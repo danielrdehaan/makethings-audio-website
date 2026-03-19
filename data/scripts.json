@@ -93,11 +93,37 @@
   "unity": {
     "title": "Unity Scripts",
     "description": "FMOD integration scripts for Unity.",
-    "categories": []
+    "categories": [
+      {
+        "name": "FMOD",
+        "scripts": [
+          {"name": "FMOD Animation Event Triggers", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/FMODAnimationEventTriggers.cs"},
+          {"name": "FMOD Button Event Control", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/FMODButtonEventControl.cs"},
+          {"name": "FMOD Slider Parameter Control", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/FMODSliderParameterControl.cs"},
+          {"name": "FMOD Toggle Parameter Control", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/FMODToggleParameterControl.cs"}
+        ]
+      },
+      {
+        "name": "Editor",
+        "scripts": [
+          {"name": "FMOD Field Info", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/Editor/FMODFieldInfo.cs"},
+          {"name": "FMOD Scene Manager", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/Editor/FMODSceneManager.cs"},
+          {"name": "FMOD Scene Scanner", "type": ".cs", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Unity/FMOD/Editor/FMODSceneScanner.cs"}
+        ]
+      }
+    ]
   },
   "fmod": {
     "title": "FMOD Scripts",
     "description": "Scripts for FMOD Studio.",
-    "categories": []
+    "categories": [
+      {
+        "name": "General",
+        "scripts": [
+          {"name": "FMOD CSV Exporter", "type": ".js", "url": "https://github.com/danielrdehaan/Scripts/blob/main/FMOD/FMOD_CSV_Exporter.js"},
+          {"name": "FMOD Obsidian Sync", "type": ".js", "url": "https://github.com/danielrdehaan/Scripts/blob/main/FMOD/FMOD_Obsidian_Sync.js"}
+        ]
+      }
+    ]
   }
 }

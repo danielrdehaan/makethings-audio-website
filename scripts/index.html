@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FMOD Scripts - makethings.audio</title>
-  <meta name="description" content="Scripts for FMOD Studio.">
+  <title>Scripts - makethings.audio</title>
+  <meta name="description" content="Scripts for Reaper, Unity, and FMOD Studio.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
       <div class="container">
         <a href="/" class="site-logo">makethings.<span>audio</span></a>
         <nav>
-          <a href="/scripts/">Scripts</a>
+          <a href="/">Home</a>
         </nav>
       </div>
     </header>
@@ -24,10 +24,24 @@
     <main>
       <div class="container">
         <div class="page-header">
-          <h1>FMOD Scripts</h1>
-          <p>Scripts for FMOD Studio.</p>
+          <h1>Scripts</h1>
+          <p>Tools and scripts for audio design workflows.</p>
         </div>
-        <div id="scripts-container"></div>
+
+        <div class="tools-grid">
+          <a href="/reaper-scripts/" class="tool-card">
+            <h3>Reaper</h3>
+            <p>Custom scripts for audio design workflows in Reaper.</p>
+          </a>
+          <a href="/unity-scripts/" class="tool-card">
+            <h3>Unity</h3>
+            <p>FMOD integration scripts for Unity.</p>
+          </a>
+          <a href="/fmod-scripts/" class="tool-card">
+            <h3>FMOD Studio</h3>
+            <p>Scripts for FMOD Studio.</p>
+          </a>
+        </div>
       </div>
     </main>
 
@@ -37,8 +51,5 @@
       </div>
     </footer>
   </div>
-
-  <script src="/scripts-renderer.js"></script>
-  <script>renderScripts('fmod');</script>
 </body>
 </html>
