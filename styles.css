@@ -14,6 +14,17 @@
   --max-width: 640px;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1817;
+    --text: #e8e5e1;
+    --muted: #9a938b;
+    --accent: #6b9bff;
+    --accent-hover: #8bb0ff;
+    --border: #2e2b28;
+  }
+}
+
 html { scroll-behavior: smooth; }
 
 body {
