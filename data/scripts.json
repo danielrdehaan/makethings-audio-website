@@ -1,0 +1,103 @@
+{
+  "reaper": {
+    "title": "Reaper Scripts",
+    "description": "Custom scripts for audio design workflows in Reaper.",
+    "featured": [
+      {
+        "name": "Random Containers",
+        "description": "Add random container functionality to items in Reaper.",
+        "url": "https://github.com/danielrdehaan/Random-Containers-for-Reaper"
+      },
+      {
+        "name": "ReaMOD",
+        "description": "Control FMOD from within Reaper.",
+        "url": "https://github.com/danielrdehaan/ReaMOD"
+      }
+    ],
+    "categories": [
+      {
+        "name": "MIDI",
+        "scripts": [
+          {"name": "Assign MIDI Channel from Highest to Lowest Note", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_Assign%20MIDI%20Channel%20from%20highest%20to%20lowest%20note.lua"},
+          {"name": "Explode Multi-Channel MIDI Item to Single Channel MIDI Items and set all events to channel 1", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_Explode%20Multi-Channel%20MIDI%20Item%20to%20Single%20Channel%20MIDI%20Items%20and%20set%20all%20events%20to%20channel%201.lua"},
+          {"name": "Export each MIDI item (active take) to individual .mid files", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_Export%20each%20MIDI%20item%20%28active%20take%29%20to%20individual%20.mid%20files.lua"},
+          {"name": "MIDI Editor - Set MIDI Editor Grid", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_MIDI%20Editor%20-%20Set%20MIDI%20Editor%20Grid.lua"},
+          {"name": "MIDI Editor - Show Specific MIDI Event Lane(s)", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_MIDI%20Editor%20-%20Show%20Specific%20MIDI%20Event%20Lane%28s%29.lua"},
+          {"name": "Select MIDI Note by Name", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_Select%20MIDI%20Note%20by%20Name.lua"},
+          {"name": "Set MIDI Channel of Selected Events", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/MIDI/DRD_Set%20MIDI%20Channel%20of%20Selected%20Events.lua"}
+        ]
+      },
+      {
+        "name": "Items & Takes",
+        "scripts": [
+          {"name": "ActiveTakeRandomizer", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_ActiveTakeRandomizer.lua"},
+          {"name": "Begin Playback from Selected Item(s)", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Begin%20Playback%20from%20Selected%20Item%28s%29.lua"},
+          {"name": "Explode Selected Item(s) to new tracks and move to edit cursor", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Explode%20Selected%20Item%28s%29%20to%20new%20tracks%20and%20move%20to%20edit%20cursor.lua"},
+          {"name": "Open original Reaper project for selected media item(s)", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Open%20original%20Reaper%20project%20for%20selected%20media%20item%28s%29.lua"},
+          {"name": "Randomize Active Take During Playback", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Randomize%20Active%20Take%20During%20Playback.lua"},
+          {"name": "Randomize Pan Position for Selected Media Items", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Randomize%20Pan%20Position%20for%20Selected%20Media%20Items.lua"},
+          {"name": "Rename active take to its first take marker name", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Rename%20active%20take%20to%20its%20first%20take%20marker%20name.lua"},
+          {"name": "Split Selected Items at start and end of all project regions", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Split%20Selected%20Items%20at%20start%20and%20end%20of%20all%20project%20regions.lua"},
+          {"name": "Split media item at take markers and pack into as takes into a single item", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Split%20media%20item%20at%20take%20markers%20and%20pack%20into%20as%20takes%20into%20a%20single%20item.lua"},
+          {"name": "Toggle Item Time-Base and Tempo Behaviour", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Items-Takes/DRD_Toggle%20Item%20Time-Base%20and%20Tempo%20Behaviour.lua"}
+        ]
+      },
+      {
+        "name": "Tracks",
+        "scripts": [
+          {"name": "Add child track to selected track(s)", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Add%20child%20track%20to%20selected%20track%28s%29.lua"},
+          {"name": "Copy Selected Tracks Name and Save as Track Template", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Copy%20Selected%20Tracks%20Name%20and%20Save%20as%20Track%20Template.lua"},
+          {"name": "Insert Empty Audio Track", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Insert%20Empty%20Audio%20Track.lua"},
+          {"name": "Insert Empty Instrument Track", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Insert%20Empty%20Instrument%20Track.lua"},
+          {"name": "Insert Track Respecting Folder", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Insert%20Track%20Respecting%20Folder.lua"},
+          {"name": "Insert Track in Folder", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Insert%20Track%20in%20Folder.lua"},
+          {"name": "Reverse elements of select track name - copy to clipboard - then prompt to save select track as track template", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Reverse%20elements%20of%20select%20track%20name%20-%20copy%20to%20clipboard%20-%20then%20prompt%20to%20save%20select%20track%20as%20track%20template.lua"},
+          {"name": "Select Track by Index Number", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Select%20Track%20by%20Index%20Number.lua"},
+          {"name": "Toggle Show Only Tracks with Items at Edit Cursor", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Tracks/DRD_Toggle%20Show%20Only%20Tracks%20with%20Items%20at%20Edit%20Cursor.lua"}
+        ]
+      },
+      {
+        "name": "Grid & Navigation",
+        "scripts": [
+          {"name": "Prompt User for Key Snap", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Grid-Navigation/DRD_Prompt%20User%20for%20Key%20Snap.lua"},
+          {"name": "Set Main Window Grid", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Grid-Navigation/DRD_Set%20Main%20Window%20Grid.lua"}
+        ]
+      },
+      {
+        "name": "FMOD Integration",
+        "scripts": [
+          {"name": "Send TCP Message to FMOD", "type": ".eel", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/FMOD-Integration/DRD_Send%20TCP%20Message%20to%20FMOD.eel"},
+          {"name": "Simple FMOD TCP", "type": ".eel", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/FMOD-Integration/DRD_Simple%20FMOD%20TCP.eel"},
+          {"name": "Tigger FMOD event with named marker", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/FMOD-Integration/DRD_Tigger%20FMOD%20event%20with%20named%20marker.lua"},
+          {"name": "Trigger FMOD event via named makers", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/FMOD-Integration/DRD_Trigger%20FMOD%20event%20via%20named%20makers.lua"}
+        ]
+      },
+      {
+        "name": "Metadata",
+        "scripts": [
+          {"name": "Open-Original-Reaper-Project-From-Path-In-BWF-Metadata", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Metadata/DRD_Open-Original-Reaper-Project-From-Path-In-BWF-Metadata.lua"},
+          {"name": "Set current project path as Project:Originator Reference Metadata entry", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Metadata/DRD_Set%20current%20project%20path%20as%20Project%3AOriginator%20Reference%20Metadata%20entry.lua"}
+        ]
+      },
+      {
+        "name": "Import & Export",
+        "scripts": [
+          {"name": "Export midi and audio to obsidian note", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Import-Export/DRD_Export%20midi%20and%20audio%20to%20obsidian%20note.lua"},
+          {"name": "Import audio files from folder and replicate folder structure with tracks", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Import-Export/DRD_Import%20audio%20files%20from%20folder%20and%20replicate%20folder%20structure%20with%20tracks.lua"},
+          {"name": "Import-AAF", "type": ".py", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Import-Export/DRD_Import-AAF.py"},
+          {"name": "Open-AAF-File", "type": ".lua", "url": "https://github.com/danielrdehaan/Scripts/blob/main/Reaper/Import-Export/DRD_Open-AAF-File.lua"}
+        ]
+      }
+    ]
+  },
+  "unity": {
+    "title": "Unity Scripts",
+    "description": "FMOD integration scripts for Unity.",
+    "categories": []
+  },
+  "fmod": {
+    "title": "FMOD Scripts",
+    "description": "Scripts for FMOD Studio.",
+    "categories": []
+  }
+}

@@ -1,0 +1,186 @@
+name: Update Script Listings
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [scripts-updated]
+
+permissions:
+  contents: write
+
+jobs:
+  update-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website repo
+        uses: actions/checkout@v4
+
+      - name: Fetch script tree and generate data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Fetch the full repo tree from danielrdehaan/Scripts
+          TREE=$(gh api repos/danielrdehaan/Scripts/git/trees/main?recursive=1)
+
+          # Fetch the manifest (may not exist yet)
+          MANIFEST=$(gh api repos/danielrdehaan/Scripts/contents/scripts-manifest.json \
+            --header 'Accept: application/vnd.github.raw+json' 2>/dev/null || echo '{}')
+
+          # Generate data/scripts.json using Python
+          python3 - "$TREE" "$MANIFEST" <<'PYTHON_SCRIPT'
+          import json, sys, re, urllib.parse
+
+          tree_data = json.loads(sys.argv[1])
+          manifest = json.loads(sys.argv[2])
+
+          entries = tree_data.get("tree", [])
+          exclude_patterns = manifest.get("exclude", ["__pycache__", "Fonts", "README.md", "*.alias", "*OLD*"])
+          category_display = manifest.get("categoryDisplayNames", {
+              "Items-Takes": "Items & Takes",
+              "Grid-Navigation": "Grid & Navigation",
+              "FMOD-Integration": "FMOD Integration",
+              "Import-Export": "Import & Export"
+          })
+          featured = manifest.get("featured", {})
+
+          BASE_URL = "https://github.com/danielrdehaan/Scripts/blob/main/"
+          SCRIPT_EXTENSIONS = {".lua", ".eel", ".py", ".js", ".cs"}
+
+          def matches_exclude(name):
+              import fnmatch
+              for pat in exclude_patterns:
+                  if fnmatch.fnmatch(name, pat):
+                      return True
+              return False
+
+          def clean_name(filename):
+              # Strip extension
+              name = re.sub(r'\.[^.]+$', '', filename)
+              # Strip DRD_ prefix
+              name = re.sub(r'^DRD_', '', name)
+              # Replace underscores and hyphens used as separators
+              name = name.replace('_', ' ').replace(' - ', ' - ')
+              return name.strip()
+
+          def get_extension(filename):
+              m = re.search(r'(\.[^.]+)$', filename)
+              return m.group(1) if m else ""
+
+          def make_url(path):
+              parts = path.split('/')
+              encoded = '/'.join(urllib.parse.quote(p, safe='') for p in parts)
+              return BASE_URL + encoded
+
+          def is_script(path):
+              ext = get_extension(path)
+              return ext.lower() in SCRIPT_EXTENSIONS
+
+          # Platform configs
+          platforms = {
+              "reaper": {
+                  "prefix": "Reaper/",
+                  "title": "Reaper Scripts",
+                  "description": "Custom scripts for audio design workflows in Reaper."
+              },
+              "unity": {
+                  "prefix": "Unity/FMOD/",
+                  "title": "Unity Scripts",
+                  "description": "FMOD integration scripts for Unity."
+              },
+              "fmod": {
+                  "prefix": "FMOD/",
+                  "title": "FMOD Scripts",
+                  "description": "Scripts for FMOD Studio."
+              }
+          }
+
+          output = {}
+
+          for platform_key, config in platforms.items():
+              prefix = config["prefix"]
+              categories = {}
+
+              for entry in entries:
+                  path = entry.get("path", "")
+                  if entry.get("type") != "blob":
+                      continue
+                  if not path.startswith(prefix):
+                      continue
+
+                  rel_path = path[len(prefix):]
+                  parts = rel_path.split('/')
+                  filename = parts[-1]
+
+                  # Skip excluded files/folders
+                  if any(matches_exclude(p) for p in parts):
+                      continue
+                  # Skip _archive
+                  if any(p.startswith('_') for p in parts[:-1]):
+                      continue
+                  if not is_script(filename):
+                      continue
+
+                  # Determine category
+                  if len(parts) > 1:
+                      cat_folder = parts[0]
+                  else:
+                      cat_folder = "General"
+
+                  if cat_folder not in categories:
+                      categories[cat_folder] = []
+
+                  categories[cat_folder].append({
+                      "name": clean_name(filename),
+                      "type": get_extension(filename),
+                      "url": make_url(path)
+                  })
+
+              # Sort scripts within each category
+              for cat in categories:
+                  categories[cat].sort(key=lambda s: s["name"].lower())
+
+              # Build category list with display names
+              cat_list = []
+              for cat_folder in sorted(categories.keys()):
+                  display_name = category_display.get(cat_folder, cat_folder)
+                  cat_list.append({
+                      "name": display_name,
+                      "scripts": categories[cat_folder]
+                  })
+
+              platform_data = {
+                  "title": config["title"],
+                  "description": config["description"],
+                  "categories": cat_list
+              }
+
+              # Add featured if present
+              if platform_key in featured:
+                  platform_data["featured"] = featured[platform_key]
+
+              output[platform_key] = platform_data
+
+          with open("data/scripts.json", "w") as f:
+              json.dump(output, f, indent=2)
+
+          # Summary
+          for k, v in output.items():
+              total = sum(len(c["scripts"]) for c in v["categories"])
+              print(f"{k}: {len(v['categories'])} categories, {total} scripts")
+          PYTHON_SCRIPT
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/scripts.json
+          if git diff --cached --quiet; then
+            echo "No changes to scripts.json"
+          else
+            git commit -m "Update script listings [automated]"
+            git push
+          fi

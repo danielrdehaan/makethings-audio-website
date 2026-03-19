@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMOD Scripts - makethings.audio</title>
+  <meta name="description" content="Scripts for FMOD Studio.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a href="/" class="site-logo">makethings.<span>audio</span></a>
+        <nav>
+          <a href="/reaper-scripts/">Reaper</a>
+          <a href="/unity-scripts/">Unity</a>
+          <a href="/fmod-scripts/">FMOD</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="page-header">
+          <h1>FMOD Scripts</h1>
+          <p>Scripts for FMOD Studio.</p>
+        </div>
+        <div id="scripts-container"></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; 2025 <a href="https://makethings.studio">makethings.studio</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/scripts-renderer.js"></script>
+  <script>renderScripts('fmod');</script>
+</body>
+</html>

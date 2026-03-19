@@ -1,41 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>makethings.audio</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-        }
-        h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-        }
-        h1 span { color: #7c3aed; }
-        p {
-            font-size: 1.25rem;
-            color: #888;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>makethings.audio</title>
+  <meta name="description" content="Audio design by Daniel de Haan.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>make<span>things</span>.audio</h1>
-        <p>Coming soon.</p>
-    </div>
+  <div class="page">
+    <main class="hero">
+      <div>
+        <h1>
+          <span class="wordmark">makethings.</span><span class="rotating-word" id="rotatingWord"><span class="in">audio</span></span>
+        </h1>
+        <a href="mailto:hi@makethings.audio" class="contact-link">hi@makethings.audio</a>
+        <div class="hero-links">
+          <a href="/reaper-scripts/" class="hero-link">Reaper Scripts</a>
+          <a href="/unity-scripts/" class="hero-link">Unity Scripts</a>
+          <a href="/fmod-scripts/" class="hero-link">FMOD Scripts</a>
+        </div>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; 2025 <a href="https://makethings.studio">makethings.studio</a></p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const fonts = [
+      'Pacifico',
+      'Permanent Marker',
+      'Bungee',
+      'Caveat',
+      'Lobster',
+      'Righteous',
+      'Satisfy',
+      'Fredoka',
+      'Abril Fatface',
+      'Press Start 2P',
+      'Sacramento',
+      'Concert One',
+      'Silkscreen',
+      'Comfortaa',
+      'Rubik Mono One',
+      'Playfair Display',
+      'Monoton',
+      'Russo One',
+      'Indie Flower',
+      'Bangers',
+      'Bungee Shade',
+      'Rubik Burned',
+      'Rubik Vinyl',
+      'Rubik Wet Paint',
+      'Rubik Glitch',
+      'Rubik Puddles',
+      'Rubik Spray Paint',
+      'Rubik Storm',
+      'Rubik Distressed',
+      'Rubik Maze',
+      'Creepster',
+      'Fascinate',
+      'Faster One',
+      'Rammetto One',
+      'Shrikhand',
+      'Orbitron',
+      'Audiowide',
+      'Bungee Inline',
+      'Megrim',
+      'Poiret One',
+      'Wallpoet',
+      'Notable',
+      'Vast Shadow',
+      'Londrina Solid',
+      'Londrina Outline',
+      'Londrina Shadow',
+      'Honk',
+      'Bagel Fat One',
+      'Moo Lah Lah',
+      'Nabla',
+      'Tiny5',
+      'Pixelify Sans',
+      'Jersey 10',
+      'Jersey 25',
+      'Kalnia',
+      'Jacquard 12',
+      'Micro 5',
+      'Foldit',
+      'Climate Crisis',
+      'Kablammo',
+    ];
+
+    // Preload fonts in batches via Google Fonts
+    const batchSize = 15;
+    for (let i = 0; i < fonts.length; i += batchSize) {
+      const batch = fonts.slice(i, i + batchSize);
+      const params = batch.map(f => 'family=' + f.replace(/ /g, '+')).join('&');
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?' + params + '&display=swap';
+      document.head.appendChild(link);
+    }
+
+    let lastHue = -1;
+    function randomColor() {
+      let h;
+      do {
+        h = Math.floor(Math.random() * 360);
+      } while (lastHue >= 0 && Math.min(Math.abs(h - lastHue), 360 - Math.abs(h - lastHue)) < 60);
+      lastHue = h;
+      const s = 60 + Math.floor(Math.random() * 30);
+      const l = 45 + Math.floor(Math.random() * 20);
+      return 'hsl(' + h + ',' + s + '%,' + l + '%)';
+    }
+
+    const container = document.getElementById('rotatingWord');
+    let current = 0;
+
+    // Set initial width
+    const initialSpan = container.querySelector('.in');
+    container.style.width = initialSpan.offsetWidth + 'px';
+
+    async function cycle() {
+      const currentSpan = container.querySelector('.in');
+      const next = (current + 1) % fonts.length;
+      const fontFamily = fonts[next];
+
+      // Wait for font to be ready before transitioning
+      try {
+        await document.fonts.load('1em "' + fontFamily + '"');
+      } catch (e) {}
+
+      const nextSpan = document.createElement('span');
+      nextSpan.textContent = 'audio';
+      nextSpan.style.fontFamily = "'" + fontFamily + "', cursive";
+      nextSpan.style.color = randomColor();
+      nextSpan.className = 'waiting';
+      container.appendChild(nextSpan);
+
+      // Force reflow then transition
+      nextSpan.offsetHeight;
+      currentSpan.className = 'out';
+      nextSpan.className = 'in';
+      container.style.width = nextSpan.offsetWidth + 'px';
+
+      setTimeout(() => currentSpan.remove(), 400);
+      current = next;
+    }
+
+    setInterval(cycle, 2200);
+  </script>
 </body>
 </html>
