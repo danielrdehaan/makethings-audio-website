@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make Things EQ</title>
+<script>if (!/\/plugins\/eq\/?$/.test(location.pathname)) document.documentElement.classList.add('list');</script>
+<meta name="description" content="The EQ that does it all, and makes it feel simple. One session, every feature. AU and VST3 for Mac and Windows.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Make Things EQ">
+<meta property="og:description" content="The EQ that does it all, and makes it feel simple. One session, every feature. AU and VST3 for Mac and Windows.">
+<meta property="og:url" content="https://makethings.audio/plugins/eq/">
+<link rel="canonical" href="https://makethings.audio/plugins/eq/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@500&display=swap">
+<style>
+/* One dark, cinematic look (deliberately single-theme): the plugin's own recordings are the light source.
+   Coral is the hit, teal is the ring, everywhere. */
+:root {
+  /* Pro Dark, the EQ's own theme (src/lib/themePresets.ts 'pro-dark') */
+  --bg: #111416; --raise: #171b1e; --surface: #1f2528; --ink: #f4f3ef; --text: #c9cdd1; --muted: #9aa0a6; --line: #2c3337; --edge: #5a646b;
+  --accent: #7fa3d6; --hit: #e07a6c; --ring: #4faf84; --amber: #d9a441;
+  --f-display: 'Geist', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --f-body: 'Geist', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --f-mono: 'Geist Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.55 var(--f-body); overflow-x: clip; }
+img, video { max-width: 100%; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.hit { color: var(--hit); }
+.ring { color: var(--ring); }
+
+/* top bar */
+.top { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 22px 0; }
+.mark { font: 700 18px/1 var(--f-display); letter-spacing: -0.03em; color: var(--ink); text-decoration: none; }
+.mark span { font: 500 12px var(--f-mono); color: var(--muted); letter-spacing: .1em; margin-left: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 999px; font: 600 15px var(--f-body); text-decoration: none; color: #111416; background: var(--accent); transition: transform .2s ease, box-shadow .2s ease; }
+.pill:hover { transform: translateY(-1px); box-shadow: 0 10px 30px -8px rgba(127, 163, 214, .55); }
+.pill.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--edge); }
+.pill svg { width: 15px; height: 15px; }
+
+/* hero */
+.hero { position: relative; text-align: center; padding-block: clamp(64px, 11vw, 150px) 0; }
+.glow { position: absolute; inset: -10% -20% auto; height: 1100px; pointer-events: none; z-index: 0;
+  background: radial-gradient(40% 32% at 30% 58%, rgba(224, 122, 108, .2), transparent 70%), radial-gradient(38% 30% at 72% 62%, rgba(79, 175, 132, .18), transparent 70%), radial-gradient(30% 24% at 52% 30%, rgba(127, 163, 214, .1), transparent 70%); filter: blur(10px); }
+.hero > .wrap, .hero > .stage { position: relative; z-index: 1; }
+.hero, .closer { overflow-x: clip; }
+.eyebrow { font: 500 12.5px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 26px; }
+h1 { font: 700 clamp(42px, 11vw, 168px)/0.9 var(--f-display); letter-spacing: -0.055em; color: var(--ink); margin: 0; }
+h1 .l { display: block; }
+h1 .hit, h1 .ring { text-shadow: 0 0 60px currentColor; }
+.sub { font-size: clamp(18px, 1.8vw, 22px); color: var(--text); margin: 30px auto 0; max-width: 34ch; }
+.ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+
+.stage { perspective: 1800px; margin-top: clamp(56px, 8vw, 96px); padding-inline: clamp(0px, 2vw, 24px); }
+.tilt { --t: 1; transform-origin: 50% 0; transform: rotateX(calc(var(--t) * 26deg)) scale(calc(1 - var(--t) * .06)); will-change: transform; max-width: 1400px; margin: 0 auto; }
+.frame { position: relative; border-radius: 14px; background: #111416; box-shadow: 0 0 0 1px var(--line), 0 50px 140px -30px rgba(0, 0, 0, .9), 0 0 120px -30px rgba(224, 122, 108, .35); }
+.frame video, .frame img { width: 100%; height: auto; border-radius: inherit; }
+.tag { position: absolute; left: 0; bottom: calc(100% + 14px); font: 500 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: #f4f3ef; background: rgba(17, 20, 22, .72); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; display: flex; align-items: center; gap: 7px; backdrop-filter: blur(6px); }
+.tag i { width: 7px; height: 7px; border-radius: 50%; background: var(--hit); box-shadow: 0 0 10px var(--hit); animation: rec 1.25s ease-in-out infinite; }
+@keyframes rec { 50% { opacity: .25; } }
+
+/* numbers */
+.nums { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: clamp(80px, 11vw, 150px) 0 0; padding: 0; list-style: none; }
+.nums li { text-align: center; padding: 6px 10px; }
+.nums li + li { border-left: 1px solid var(--line); }
+.nums b { display: block; font: 700 clamp(40px, 5.4vw, 80px)/1 var(--f-display); letter-spacing: -0.05em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.nums span { display: block; margin-top: 10px; font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* features */
+.feat { padding-block: clamp(110px, 14vw, 200px) 0; }
+.feat h2 { font: 700 clamp(44px, 7vw, 104px)/0.94 var(--f-display); letter-spacing: -0.05em; color: var(--ink); margin: 0; text-wrap: balance; }
+.feat p { margin: 22px 0 0; font-size: clamp(18px, 1.7vw, 21px); max-width: 38ch; }
+.feat .head { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px 60px; align-items: end; margin-bottom: clamp(36px, 5vw, 60px); }
+.feat .head p { margin: 0; }
+.gains { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 26px; }
+.gains div { display: grid; gap: 2px; }
+.gains b { font: 700 clamp(34px, 4vw, 54px)/1 var(--f-display); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.gains span { font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.bleed { max-width: 1520px; margin: 0 auto; padding-inline: clamp(0px, 2vw, 24px); }
+
+.duo .frame { margin-top: 40px; }
+.duo { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(36px, 4vw, 56px); align-items: start; }
+.duo h3 { font: 700 clamp(32px, 4vw, 54px)/1 var(--f-display); letter-spacing: -0.045em; color: var(--ink); margin: 26px 0 0; }
+.duo h3 + p { margin-top: 12px; }
+.duo > div:nth-child(2) { margin-top: clamp(0px, 10vw, 140px); }
+.mono { font-family: var(--f-mono); font-size: .92em; color: var(--ink); }
+
+/* drive */
+.drive { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); gap: 40px 70px; align-items: center; }
+.words { margin: 30px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0 .32em; font: 300 clamp(36px, 5vw, 74px)/1.06 var(--f-display); letter-spacing: -0.04em; color: rgba(244, 243, 239, .2); }
+.words li { transition: color .25s ease; cursor: default; }
+.words li:hover, .words li.on { color: var(--ink); font-weight: 700; }
+.words li:nth-child(5) { color: var(--hit); font-weight: 700; }
+.drive .frame { box-shadow: 0 0 0 1px var(--line), 0 40px 120px -30px rgba(0, 0, 0, .9), 0 0 120px -40px rgba(224, 122, 108, .45); }
+
+/* surround */
+.room { text-align: center; }
+.room .big { font: 700 clamp(110px, 24vw, 360px)/0.84 var(--f-display); letter-spacing: -0.065em; margin: 0; background: linear-gradient(180deg, var(--ink) 20%, rgba(244, 243, 239, .08) 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.room h2 { margin-top: 18px; }
+.room p { margin-inline: auto; }
+
+/* closer */
+.closer { text-align: center; padding-block: clamp(120px, 15vw, 220px) clamp(80px, 9vw, 120px); position: relative; }
+.closer .glow { inset: 0 -20% auto; height: 700px; }
+.closer h2 { font: 700 clamp(48px, 8.6vw, 132px)/0.92 var(--f-display); letter-spacing: -0.055em; color: var(--ink); margin: 0; position: relative; }
+.closer .ctas { position: relative; }
+.closer .fine { position: relative; margin-top: 26px; font: 500 12.5px var(--f-mono); letter-spacing: .08em; color: var(--muted); }
+.closer .fine span { color: var(--text); user-select: all; }
+.foot { border-top: 1px solid var(--line); padding-block: 20px 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; font: 500 12px var(--f-mono); letter-spacing: .06em; color: var(--muted); }
+.foot a { text-decoration: none; }
+.foot a:hover { color: var(--ink); }
+
+
+/* the Band Detail card tour: the real card, numbered pins placed from the control positions measured at capture */
+.tour { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 40px clamp(40px, 6vw, 96px); align-items: start; }
+.tour-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); margin-bottom: 22px; }
+.tour-tabs button { font: 600 15px var(--f-body); color: var(--muted); background: none; border: 0; border-radius: 999px; padding: 9px 18px; cursor: pointer; }
+.tour-tabs button[aria-selected="true"] { color: #111416; background: var(--accent); }
+.cardbox { position: relative; border-radius: 16px; box-shadow: 0 0 0 1px var(--line), 0 40px 110px -30px rgba(0, 0, 0, .9), 0 0 110px -40px rgba(79, 175, 132, .5); }
+.cardbox img { width: 100%; height: auto; border-radius: 16px; }
+.pin { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; display: grid; place-items: center; font: 600 11.5px var(--f-mono); color: #111416; background: var(--ink); box-shadow: 0 0 0 3px rgba(17, 20, 22, .85); border: 0; padding: 0; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.pin.on, .pin:hover { background: var(--hit); color: #fff; transform: scale(1.18); }
+.tour-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; counter-reset: none; }
+.tour-list li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); cursor: default; transition: background .15s ease; }
+.tour-list li .n { font: 600 12.5px/22px var(--f-mono); color: var(--muted); }
+.tour-list li b { display: block; font: 600 16.5px/1.3 var(--f-body); color: var(--ink); }
+.tour-list li span { display: block; font-size: 15px; line-height: 1.4; color: var(--text); margin-top: 2px; }
+.tour-list li.on .n, .tour-list li.on b { color: var(--hit); }
+.tour-list li.sep { grid-column: 1 / -1; display: block; padding: 22px 0 6px; border-top: 0; font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 900px) { .tour { grid-template-columns: minmax(0, 1fr); } .cardbox { max-width: 460px; } }
+@media (max-width: 560px) { .cardbox { margin-inline: 16px; } .tour-list { grid-template-columns: minmax(0, 1fr); } .pin { width: 20px; height: 20px; margin: -10px 0 0 -10px; font-size: 10px; } }
+
+/* the credit: who did what */
+.made { text-align: center; padding-block: clamp(110px, 14vw, 190px) 0; }
+.made p { margin: 0 auto; max-width: 22ch; font: 700 clamp(34px, 5.2vw, 76px)/1.02 var(--f-display); letter-spacing: -0.045em; text-wrap: balance; }
+.made .h { color: var(--ink); }
+.made .m { color: rgba(244, 243, 239, .32); font-weight: 400; margin-top: 10px; max-width: none; }
+.made .h em { font-style: normal; color: var(--ring); }
+.made .m em { font-style: normal; font-family: var(--f-mono); font-weight: 500; letter-spacing: -0.06em; color: var(--hit); }
+
+/* Try it: the EQ's own device on its real engine, in a frame (try/eq-demo.html), sized to the demo's 1124 × 478 */
+.try { padding-block: clamp(110px, 14vw, 200px) 0; }
+.try .head p { max-width: 40ch; }
+.try-frame { position: relative; border-radius: 16px; background: var(--bg); box-shadow: 0 0 0 1px var(--line), 0 40px 120px -30px rgba(0, 0, 0, .9), 0 0 140px -40px rgba(127, 163, 214, .45); overflow: hidden; }
+.try-frame iframe { display: block; width: 100%; height: 520px; border: 0; background: var(--bg); transition: height .25s ease; }
+.try-note { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; font: 500 12.5px var(--f-mono); letter-spacing: .04em; color: var(--muted); }
+.try-note a { color: var(--text); }
+.try-small { display: none; }
+@media (max-width: 700px) { .try-small { display: block; } }
+
+/* the hero features: links under the hero, then one section each */
+.heroes { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; margin: clamp(60px, 8vw, 100px) 0 0; }
+.heroes a { grid-column: span 3; }
+.heroes a:nth-child(n+5) { grid-column: span 4; }
+.heroes a { display: grid; gap: 4px; padding: 18px 20px; border-radius: 14px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); text-decoration: none; transition: box-shadow .2s ease, transform .2s ease; }
+.heroes a:hover { box-shadow: inset 0 0 0 1px var(--accent); transform: translateY(-2px); }
+.heroes b { font: 600 17px/1.25 var(--f-body); color: var(--ink); }
+.heroes span { font: 500 12px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.modes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 28px; border-top: 1px solid var(--line); margin-bottom: clamp(36px, 5vw, 56px); }
+.modes li { padding-top: 16px; display: grid; gap: 4px; align-content: start; }
+.modes b { font: 700 clamp(22px, 2.4vw, 30px)/1.1 var(--f-display); letter-spacing: -0.03em; color: var(--ink); }
+.modes span { font-size: 16px; }
+.narrow-bleed { max-width: 1240px; }
+.bleed { padding-top: 16px; }
+.mods { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 20px; }
+.mods li { border-top: 1px solid var(--line); padding-top: 12px; }
+.mods b { display: block; font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.mods span { font-size: 15px; color: var(--ink); line-height: 1.5; }
+.spk { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 32px clamp(32px, 5vw, 64px); align-items: center; }
+.spk h3 { font: 700 clamp(30px, 3.6vw, 48px)/1 var(--f-display); letter-spacing: -0.045em; color: var(--ink); margin: 0 0 14px; }
+.spk p { margin: 0 0 14px; max-width: 40ch; }
+.layouts { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.layouts li { font: 600 15px var(--f-mono); color: var(--ink); padding: 6px 12px; border-radius: 8px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); }
+.fine-note { font-size: 14px; color: var(--muted); margin-top: 14px !important; }
+.fxrow { list-style: none; margin: clamp(28px, 4vw, 44px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 32px; }
+.fxrow li { display: grid; gap: 4px; padding-top: 14px; border-top: 1px solid var(--line); }
+.fxrow b { font: 600 19px/1.25 var(--f-body); color: var(--ink); }
+.fxrow span { font-size: 16px; line-height: 1.4; color: var(--text); }
+.inst-split { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 40px 70px; align-items: center; margin-top: clamp(40px, 6vw, 72px); }
+.inst-split .frame { box-shadow: 0 0 0 1px var(--line), 0 30px 90px -30px rgba(0, 0, 0, .9); }
+.inst-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.inst-list li { display: grid; align-content: start; gap: 3px; padding: 14px 0; border-top: 1px solid var(--line); }
+.inst-list b { font: 600 18px/1.25 var(--f-body); color: var(--ink); }
+.inst-list span { font-size: 16px; line-height: 1.4; color: var(--text); }
+.key-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px 70px; align-items: center; margin-top: clamp(40px, 6vw, 72px); }
+.key-split h3 { font: 700 clamp(32px, 4vw, 54px)/1.02 var(--f-display); letter-spacing: -0.045em; color: var(--ink); margin: 0 0 12px; }
+.key-split .inst-list { grid-template-columns: minmax(0, 1fr); margin-top: 26px; }
+@media (max-width: 900px) { .key-split { grid-template-columns: minmax(0, 1fr); } }
+.inst-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 22px; }
+.inst-foot small { flex: 1 1 260px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+@media (max-width: 900px) { .inst-split { grid-template-columns: minmax(0, 1fr); } .inst-split .frame { max-width: 340px; margin-inline: auto; } }
+@media (max-width: 560px) { .inst-list { grid-template-columns: minmax(0, 1fr); } }
+.words.shapes li:nth-child(5) { color: rgba(244, 243, 239, .2); font-weight: 300; }
+.words.shapes li:nth-child(5):hover, .words.shapes li:nth-child(5).on { color: var(--ink); font-weight: 700; }
+.words.shapes li:first-child { color: var(--hit); font-weight: 700; }
+#fx-shapes { padding-top: clamp(64px, 8vw, 110px); }
+@media (max-width: 900px) { .heroes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .heroes a, .heroes a:nth-child(n+5) { grid-column: auto; } .heroes a:last-child { grid-column: 1 / -1; } .fxrow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; } .spk { grid-template-columns: minmax(0, 1fr); } .mods { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; } }
+@media (max-width: 560px) { .modes { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
+
+/* the modulators: every real card, running, endlessly going by */
+.mc { position: relative; overflow: hidden; padding-block: 8px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.mc-track { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 16px; width: max-content; will-change: transform; }
+.mc-track li { flex: none; width: 264px; }
+.mc-track video { display: block; width: 100%; height: auto; border-radius: 10px; background: var(--raise); }
+@media (max-width: 560px) { .mc-track li { width: 220px; } }
+@media (prefers-reduced-motion: reduce) { .mc { overflow-x: auto; -webkit-mask-image: none; mask-image: none; } }
+
+@media (max-width: 900px) {
+  .feat .head, .duo, .drive { grid-template-columns: minmax(0, 1fr); }
+  .duo > div:nth-child(2) { margin-top: 0; }
+  .nums { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 34px; }
+  .nums li:nth-child(4) { border-left: 0; }
+}
+@media (max-width: 560px) {
+  .nums { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nums li:nth-child(odd) { border-left: 0; }
+  .nums li:nth-child(4) { border-left: 1px solid var(--line); }
+  .nums li:last-child { grid-column: 1 / -1; border-left: 0; }
+  .tag { font-size: 9.5px; padding: 3px 8px; bottom: calc(100% + 10px); }
+  .frame { border-radius: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt { --t: 0 !important; }
+  .tag i { animation: none; }
+  .pill, .words li { transition: none; }
+}
+
+/* Pricing, in the closer */
+.closer { padding-top: clamp(84px, 9vw, 130px); }
+.closer h2 { font-size: clamp(44px, 6.4vw, 96px); }
+.plans { position: relative; display: grid; grid-template-columns: 1.12fr 1fr 1fr; gap: 16px; align-items: stretch; max-width: 1120px; margin: clamp(40px, 5vw, 64px) auto 0; text-align: left; }
+.plan { display: flex; flex-direction: column; padding: clamp(22px, 2.4vw, 32px); border-radius: 16px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); }
+.plan.main { background: var(--surface); box-shadow: inset 0 0 0 1px var(--hit), 0 30px 90px -40px rgba(224, 122, 108, .55); }
+.plan h3 { font: 700 clamp(21px, 2vw, 26px)/1.12 var(--f-display); letter-spacing: -0.03em; color: var(--ink); margin: 0; }
+.plan .kind { margin: 7px 0 0; font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.plan .price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 22px 0 0; color: var(--muted); font-size: 15px; }
+.plan .price b { font: 700 clamp(44px, 5vw, 64px)/1 var(--f-display); letter-spacing: -0.05em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.plan .price s { font: 500 22px var(--f-display); color: var(--muted); }
+.plan .price span { flex: 1 0 100%; margin-top: 4px; }
+.plan ul { list-style: none; margin: 20px 0 24px; padding: 18px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; flex: 1; align-content: start; }
+.plan li { font-size: 16px; line-height: 1.38; color: var(--text); }
+.plan .pill { align-self: flex-start; }
+.trial { margin: 26px auto 0; font-size: clamp(16px, 1.5vw, 19px); color: var(--text); position: relative; }
+@media (max-width: 860px) { .plans { grid-template-columns: minmax(0, 1fr); max-width: 520px; } }
+.plans-wrap { position: relative; }
+.plans-blur { filter: blur(9px); -webkit-user-select: none; user-select: none; pointer-events: none; }
+.plans-blur .price b { filter: blur(7px); }
+.sticker-rail { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.sticker { margin: 0; padding: .32em .72em .36em; border-radius: 16px; background: #ffd23f; color: #111416; font: 800 clamp(34px, 5.6vw, 76px)/1 var(--f-display); letter-spacing: -0.04em; white-space: nowrap; transform: rotate(-5deg); box-shadow: 0 0 0 7px #f4f3ef, 0 24px 60px rgba(0, 0, 0, .65); }
+/* Stacked cards run longer than a screen: the sticker stays in view while they pass. */
+@media (max-width: 860px) { .sticker-rail { align-items: flex-start; } .sticker { position: sticky; top: calc(50svh - 40px); margin-top: 90px; } }
+
+/* One continuous scroll: a pinned stage, one EQ window, a camera moving over it. */
+body { background: var(--bg); }
+.scroller { position: relative; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--bg); margin: 0; padding: 0; perspective: none; }
+.glow2 { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(45% 40% at 32% 62%, rgba(224, 122, 108, .13), transparent 70%), radial-gradient(42% 38% at 72% 66%, rgba(79, 175, 132, .11), transparent 70%); }
+.persp { position: absolute; inset: 0; perspective: 1800px; perspective-origin: 50% 40%; }
+.world { position: absolute; left: 0; top: 0; width: 1000px; height: 575px; transform-origin: 0 0; will-change: transform; border-radius: 6px; background: #111416; box-shadow: 0 0 0 1px var(--line), 0 40px 130px -30px rgba(0, 0, 0, .9); overflow: hidden; }
+.world video, .world img { position: absolute; left: 0; top: 0; width: 100%; height: auto; max-width: none; opacity: 0; visibility: hidden; }
+.dimmer { position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; }
+.scrim { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.stage.wide .scrim { background: linear-gradient(90deg, rgba(17, 20, 22, .99) 0, rgba(17, 20, 22, .97) 35%, rgba(17, 20, 22, 0) 45%); }
+.stage.tall .scrim { background: linear-gradient(0deg, rgba(17, 20, 22, .98) 0, rgba(17, 20, 22, .94) 40%, rgba(17, 20, 22, 0) 58%); }
+.t { position: absolute; opacity: 0; visibility: hidden; will-change: transform, opacity; color: var(--text); }
+.stage.wide .t { left: max(32px, 3.4vw); top: 50%; width: 32vw; max-width: 520px; }
+.stage.tall .t { left: 20px; right: 20px; bottom: max(26px, env(safe-area-inset-bottom, 0px)); }
+.stage .t-hero, .stage .t-center { left: 0 !important; right: 0 !important; width: auto !important; max-width: none !important; text-align: center; padding-inline: 20px; }
+.stage .t-hero { top: clamp(64px, 11vh, 110px) !important; bottom: auto !important; }
+.stage .t-center { top: 50% !important; bottom: auto !important; }
+.t h1 { font-size: clamp(36px, min(6.6vw, 13vh), 104px); line-height: .98; }
+@media (max-width: 560px) { .t h1 { font-size: 9.2vw; } }
+.t h2 { font: 700 clamp(34px, min(4.4vw, 8.4vh), 70px)/0.98 var(--f-display); letter-spacing: -0.045em; color: var(--ink); margin: 0;; text-wrap: balance; }
+.stage.tall br.wb { display: none; }
+@media (max-height: 700px) { .stage.tall .t .cx { display: none; } }
+.t-center h2 { font-size: clamp(44px, 9vw, 130px); }
+.then { font: 500 clamp(17px, 1.5vw, 21px)/1.28 var(--f-display); letter-spacing: -0.012em; color: var(--muted); margin: 0 0 14px; }
+.line { margin: 16px 0 0; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.42; }
+.t .mono { font: 500 .96em var(--f-mono); color: var(--ink); }
+.t-hero .line { font-size: clamp(18px, 1.7vw, 22px); }
+.t .ctas { margin-top: 20px; }
+.cue { margin: 18px 0 0; font: 500 12px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cx { list-style: none; display: flex; flex-wrap: wrap; gap: 7px; margin: 18px 0 0; padding: 0; }
+.cx li { padding: 5px 11px; border-radius: 999px; font: 500 13.5px var(--f-body); color: var(--ink); background: rgba(31, 37, 40, .9); box-shadow: inset 0 0 0 1px var(--line); }
+.tiny { margin: 12px 0 0; font-size: 13.5px; line-height: 1.4; color: var(--muted); }
+.t .gains { margin-top: 18px; }
+.t-img { display: none; }
+.mark-in { position: absolute; left: 0; right: 0; top: 0; z-index: 6; }
+.mark-in .top { padding-block: 16px 0; }
+.bar { position: absolute; left: 0; right: 0; top: 0; z-index: 7; opacity: 0; background: rgba(17, 20, 22, .84); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); }
+.bar ol { list-style: none; margin: 0 auto; padding: 0 max(20px, 2vw); display: flex; gap: 4px; justify-content: space-between; max-width: 1400px; }
+.bar a { display: block; padding: 11px 6px; font: 500 11.5px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; color: var(--muted); white-space: nowrap; box-shadow: inset 0 -2px 0 transparent; transition: color .2s ease, box-shadow .2s ease; }
+.bar a:hover, .bar a.done { color: var(--text); }
+.bar a.on { color: var(--ink); box-shadow: inset 0 -2px 0 var(--hit); }
+.bar a i { font-style: normal; color: var(--muted); margin-right: 6px; }
+@media (max-width: 1040px) { .bar li { display: none; } .bar li.on { display: block; } .bar ol { justify-content: flex-start; } .bar a { padding-inline: 0; } }
+.stage .mc { position: absolute; left: 0; right: 0; top: 50%; margin: 0; opacity: 0; visibility: hidden; transform: translateY(-50%); }
+.stage.tall .mc { top: 32%; }
+.stage .mc-track { will-change: transform; }
+.after { background: var(--bg); position: relative; z-index: 3; }
+#yours { padding-top: clamp(40px, 6vw, 80px); }
+.note-song { text-align: center; margin: 0; padding-block: 18px 0; font: 500 11.5px var(--f-mono); letter-spacing: .06em; color: var(--muted); }
+/* Without motion: the same story, as a page. */
+html.still .scroller { height: auto !important; }
+html.still .stage { position: static; height: auto; overflow: visible; padding-bottom: 40px; }
+html.still .persp, html.still .scrim, html.still .dimmer, html.still .bar, html.still .glow2 { display: none; }
+html.still .mark-in { position: static; }
+html.still .t { position: static; opacity: 1 !important; visibility: visible !important; transform: none !important; width: auto !important; max-width: 1000px !important; margin: 80px auto 0 !important; padding-inline: 20px; text-align: left; }
+html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top: 24px; box-shadow: 0 0 0 1px var(--line); }
+html.still .stage .mc { position: static; opacity: 1; visibility: visible; transform: none; overflow-x: auto; margin-top: 24px; }
+html.still .stage .mc-track { transform: none !important; }
+
+/* The arrow to the drums' Play button. It sits over the demo but never takes a click. */
+#yours { position: relative; }
+#yours .head { margin-bottom: 14px; }
+.try-call { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px 60px; margin-bottom: clamp(30px, 3.4vw, 46px); }
+.try-call strong { display: block; font: 700 clamp(25px, 2.6vw, 36px)/1.05 var(--f-display); letter-spacing: -0.035em; color: #ffd23f; text-shadow: 0 0 34px rgba(255, 210, 63, .35); }
+.try-call p { margin: 10px 0 0; color: var(--ink); }
+.try-arrow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 4; opacity: 0; transition: opacity .6s ease; filter: drop-shadow(0 0 12px rgba(255, 210, 63, .55)); }
+.try-arrow.ready { opacity: 1; }
+.try-arrow.played { opacity: 0; }
+.ta-line { stroke: #ffd23f; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.ta-head { fill: #ffd23f; opacity: 0; }
+.ta-ring { fill: none; stroke: #ffd23f; stroke-width: 3; opacity: 0; }
+.try-arrow.go .ta-line { animation: taDraw 1.25s cubic-bezier(.5, 0, .2, 1) forwards; }
+.try-arrow.go .ta-head { animation: taIn .2s 1.12s ease-out forwards; }
+.try-arrow.go .ta-ring { animation: taRing 1.5s 1.25s ease-in-out infinite; }
+@keyframes taDraw { to { stroke-dashoffset: 0; } }
+@keyframes taIn { to { opacity: 1; } }
+@keyframes taRing { 0%, 100% { opacity: .95; } 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .try-arrow.go .ta-line, .try-arrow.go .ta-head, .try-arrow.go .ta-ring { animation: none; stroke-dashoffset: 0; opacity: 1; } }
+@media (max-width: 900px) { .try-call { grid-template-columns: minmax(0, 1fr); } .try-call > div:first-child { display: none; } #yours .head p, .try-call p, .try-call strong { padding-right: 34px; } }
+
+/* The plugin list: the first state of this page. The EQ's window is the stage's own .world, placed over the empty .lp-slot. */
+html { scrollbar-gutter: stable; }
+html.list .after { display: none; }
+.lp { position: absolute; inset: 0; z-index: 5; display: none; flex-direction: column; visibility: hidden; padding: 74px max(20px, calc((100% - 1200px) / 2)) 22px; }
+html.list .lp { display: flex; visibility: visible; }
+.lp-head { margin-bottom: clamp(14px, 3vh, 30px); will-change: transform, opacity; }
+.lp-head h1 { font: 700 clamp(34px, min(5vw, 9vh), 72px)/1 var(--f-display); letter-spacing: -0.045em; color: var(--ink); margin: 0; }
+.lp-head p { margin: 10px 0 0; font-size: clamp(15px, 1.35vw, 18px); color: var(--muted); }
+.lp-row { display: flex; gap: clamp(16px, 2vw, 28px); align-items: stretch; min-height: 0; }
+.lp-eq { display: block; flex: 0 0 min(68%, calc((100svh - 300px) * 1.739)); color: inherit; text-decoration: none; }
+.lp-slot { aspect-ratio: 1000 / 575; border-radius: 6px; }
+.lp-slot img { display: none; }
+.lp-cap { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; padding-top: 14px; will-change: opacity; }
+.lp-cap h2, .lp-ph h2 { font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--f-display); letter-spacing: -0.025em; color: var(--ink); margin: 0; }
+.lp-cap p { flex: 1 1 260px; margin: 0; font-size: clamp(14px, 1.2vw, 16px); color: var(--text); }
+.lp-go { font: 500 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--hit); transition: transform .2s ease; }
+.lp-eq:hover .lp-go, .lp-eq:focus-visible .lp-go { transform: translateX(4px); }
+.lp-eq:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 8px; }
+.lp-side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: clamp(14px, 2vh, 22px); will-change: transform, opacity; }
+.lp-ph { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+.lp-art { flex: 1 1 0; min-height: 44px; border-radius: 6px; border: 1.5px dashed var(--edge); opacity: .7; margin-bottom: 10px; }
+.lp-ph p { margin: 4px 0 0; font-size: 14px; line-height: 1.35; color: var(--text); }
+.lp-ph em { display: block; margin-top: 6px; font: 500 11px var(--f-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.stage.tall .lp { padding-top: 66px; }
+.stage.tall .lp-row { flex-direction: column; }
+.stage.tall .lp-eq { flex: none; width: 100%; }
+.stage.tall .lp-side { flex: none; flex-direction: row; }
+.stage.tall .lp-ph { flex: 1 1 0; }
+@media (max-height: 760px) { .stage.tall .lp-art { display: none; } .stage.tall .lp-head h1 { font-size: 30px; } .stage.tall .lp-head p { margin-top: 4px; } }
+/* While the list shows, the EQ page's name and pricing wait for it. */
+html.list .mark span, html.list .mark-in .pill { opacity: 0; pointer-events: none; }
+.mark span, .mark-in .pill { will-change: opacity; }
+/* Without motion: a plain list, and a plain link to the stacked EQ page. */
+html.still.list .stage { padding-bottom: 0; }
+html.still.list .stage > :not(.lp):not(.mark-in) { display: none; }
+html.still.list .lp { position: static; display: flex; visibility: visible; padding-top: 24px; }
+html.still:not(.list) .lp { display: none; }
+html.still .lp-row { flex-direction: column; }
+html.still .lp-eq { flex: none; width: 100%; }
+html.still .lp-side { flex: none; }
+html.still .lp-art { flex: none; height: 90px; }
+html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-shadow: 0 0 0 1px var(--line); }
+</style>
+</head>
+<body>
+<div class="scroller" id="scroller">
+  <div class="stage wide" id="stage">
+    <div class="glow2" aria-hidden="true"></div>
+    <div class="persp" aria-hidden="true">
+      <div class="world" id="world">
+      <video data-clip="hero" src="/plugins/media/hero.mp4" poster="/plugins/media/hero.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="inst" src="/plugins/media/inst.mp4" data-poster="/plugins/media/inst.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <img data-clip="menu" data-src="/plugins/media/menu.jpg" alt="" aria-hidden="true">
+      <video data-clip="key" src="/plugins/media/key.mp4" data-poster="/plugins/media/key.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="bass" src="/plugins/media/bass.mp4" data-poster="/plugins/media/bass.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="vocal" src="/plugins/media/vocal.mp4" data-poster="/plugins/media/vocal.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="hits" src="/plugins/media/hits.mp4" data-poster="/plugins/media/hits.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="type" src="/plugins/media/type.mp4" data-poster="/plugins/media/type.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="fx" src="/plugins/media/fx.mp4" data-poster="/plugins/media/fx.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="shapes" src="/plugins/media/shapes.mp4" data-poster="/plugins/media/shapes.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="alone" src="/plugins/media/alone.mp4" data-poster="/plugins/media/alone.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="feedback" src="/plugins/media/feedback.mp4" data-poster="/plugins/media/feedback.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="channel" src="/plugins/media/channel.mp4" data-poster="/plugins/media/channel.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <img data-clip="char" data-src="/plugins/media/char.jpg" alt="" aria-hidden="true">
+      <video data-clip="lanes" src="/plugins/media/lanes.mp4" data-poster="/plugins/media/lanes.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <img data-clip="speakers" data-src="/plugins/media/speakers.jpg" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="dimmer" id="dimmer"></div>
+    <div class="mc" id="modCarousel" tabindex="0" role="group" aria-label="All 21 modulators, each one running">
+  <ul class="mc-track" id="modTrack">
+    <li><video src="/plugins/media/mods/lfo.mp4" data-poster="/plugins/media/mods/lfo.jpg" width="528" height="600" muted loop playsinline preload="none" aria-label="The LFO modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/random.mp4" data-poster="/plugins/media/mods/random.jpg" width="528" height="524" muted loop playsinline preload="none" aria-label="The Random modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/steps.mp4" data-poster="/plugins/media/mods/steps.jpg" width="528" height="638" muted loop playsinline preload="none" aria-label="The Steps modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/segments.mp4" data-poster="/plugins/media/mods/segments.jpg" width="528" height="654" muted loop playsinline preload="none" aria-label="The Segments modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/transport.mp4" data-poster="/plugins/media/mods/transport.jpg" width="528" height="232" muted loop playsinline preload="none" aria-label="The Transport modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/macro.mp4" data-poster="/plugins/media/mods/macro.jpg" width="528" height="244" muted loop playsinline preload="none" aria-label="The Macro modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/button.mp4" data-poster="/plugins/media/mods/button.jpg" width="528" height="392" muted loop playsinline preload="none" aria-label="The Button modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/xy.mp4" data-poster="/plugins/media/mods/xy.jpg" width="528" height="564" muted loop playsinline preload="none" aria-label="The XY modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/env-follower.mp4" data-poster="/plugins/media/mods/env-follower.jpg" width="528" height="392" muted loop playsinline preload="none" aria-label="The Env Follower modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/sidechain.mp4" data-poster="/plugins/media/mods/sidechain.jpg" width="528" height="392" muted loop playsinline preload="none" aria-label="The Sidechain modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/pitch-follower.mp4" data-poster="/plugins/media/mods/pitch-follower.jpg" width="528" height="392" muted loop playsinline preload="none" aria-label="The Pitch Follower modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/transient.mp4" data-poster="/plugins/media/mods/transient.jpg" width="528" height="484" muted loop playsinline preload="none" aria-label="The Transient modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/math.mp4" data-poster="/plugins/media/mods/math.jpg" width="528" height="450" muted loop playsinline preload="none" aria-label="The Math modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/sample-hold.mp4" data-poster="/plugins/media/mods/sample-hold.jpg" width="528" height="530" muted loop playsinline preload="none" aria-label="The Sample &amp; Hold modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/shaper.mp4" data-poster="/plugins/media/mods/shaper.jpg" width="528" height="618" muted loop playsinline preload="none" aria-label="The Shaper modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/slew.mp4" data-poster="/plugins/media/mods/slew.jpg" width="528" height="450" muted loop playsinline preload="none" aria-label="The Slew modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/quantize.mp4" data-poster="/plugins/media/mods/quantize.jpg" width="528" height="450" muted loop playsinline preload="none" aria-label="The Quantize modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/range.mp4" data-poster="/plugins/media/mods/range.jpg" width="528" height="450" muted loop playsinline preload="none" aria-label="The Range modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/adsr.mp4" data-poster="/plugins/media/mods/adsr.jpg" width="528" height="588" muted loop playsinline preload="none" aria-label="The ADSR modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/expressions.mp4" data-poster="/plugins/media/mods/expressions.jpg" width="528" height="334" muted loop playsinline preload="none" aria-label="The Expressions modulator card, animating"></video></li>
+    <li><video src="/plugins/media/mods/keytrack.mp4" data-poster="/plugins/media/mods/keytrack.jpg" width="528" height="392" muted loop playsinline preload="none" aria-label="The Keytrack modulator card, animating"></video></li>
+  </ul>
+</div>
+    <div class="scrim" id="scrim"></div>
+    <section class="lp" id="lp" aria-label="Make Things plugins">
+      <div class="lp-head" id="lpHead">
+        <h1>Plugins</h1>
+        <p>AU and VST3, for Mac and Windows.</p>
+      </div>
+      <div class="lp-row">
+        <a class="lp-eq" id="lpEq" href="/plugins/eq/">
+          <div class="lp-slot" id="lpSlot"><img src="/plugins/media/hero.jpg" alt="The Make Things EQ window." loading="lazy"></div>
+          <div class="lp-cap" id="lpCap">
+            <h2>Make Things EQ</h2>
+            <p>The EQ that does it all, and makes it feel simple.</p>
+            <span class="lp-go" aria-hidden="true">See it →</span>
+          </div>
+        </a>
+        <div class="lp-side" id="lpSide">
+          <div class="lp-ph">
+            <div class="lp-art" aria-hidden="true"></div>
+            <h2>Make Things Dynamics</h2>
+            <p>Compression and gating, a partner for the EQ.</p>
+            <em>Coming later</em>
+          </div>
+          <div class="lp-ph">
+            <div class="lp-art" aria-hidden="true"></div>
+            <h2>Make Things Modular</h2>
+            <p>The whole rack as an instrument, an audio effect or a MIDI effect.</p>
+            <em>Page coming soon</em>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="mark-in" id="markIn"><div class="wrap">
+  <header class="top">
+    <a class="mark" href="/">Make Things<span>EQ</span></a>
+    <a class="pill" href="#get">Pricing</a>
+  </header>
+</div></div>
+    <nav class="bar" id="bar" aria-label="The session"><ol><li><a href="#see" data-go="see"><i>1</i>See it</a></li><li><a href="#room" data-go="room"><i>2</i>Make room</a></li><li><a href="#edge" data-go="edge"><i>3</i>The edge</a></li><li><a href="#drums" data-go="drums"><i>4</i>The hits</a></li><li><a href="#drive" data-go="drive"><i>5</i>The drive</a></li><li><a href="#lift" data-go="lift"><i>6</i>The lift</a></li><li><a href="#ask" data-go="ask"><i>7</i>The ask</a></li><li><a href="#end" data-go="end"><i>8</i>Your turn</a></li></ol></nav>
+    <div class="t t-hero" data-b="0">
+      <h1 id="h1">The EQ that does it all,<br>and makes it feel <span class="hit">simple.</span></h1>
+      <p class="line">One session, every feature. See how little it takes.</p>
+      <div class="ctas"><a class="pill ghost" href="#yours">Mix it yourself</a></div><p class="cue" aria-hidden="true">Scroll ↓</p>
+      <img class="t-img" src="/plugins/media/hero.jpg" alt="The full window on the lead vocal of Not Alone in its first chorus." loading="lazy">
+    </div>
+    <div class="t" data-b="1">
+      <p class="then">One track vanishes in the mix. You open its EQ.</p>
+      <h2>Every track is<br><span class="hit">right there.</span></h2>
+      <p class="line">Every Make Things EQ in your session is listed beside the curve, with its name, its band count and a live picture of its curve and spectrum.</p>
+      <img class="t-img" src="/plugins/media/inst.jpg" alt="The full window with seven EQs in the Instances list." loading="lazy">
+    </div>
+    <div class="t" data-b="2">
+      <h2>All your session’s EQs.<br>Live.<br class="wb"> In one window.</h2>
+      <p class="line">Click one and this window controls it, with automation and undo going to that EQ. Put any other EQ’s curve or spectrum behind the one you’re editing.</p>
+      <ul class="cx"><li>Overlay curves</li><li>Overlay spectra</li><li>Solo · Mute · Bypass</li><li>Your names</li></ul>
+      <img class="t-img" src="/plugins/media/inst.jpg" alt="The Instances list up close." loading="lazy">
+    </div>
+    <div class="t" data-b="3">
+      <p class="then">Turn on masking.</p>
+      <h2>There’s<br><span class="hit">your fight.</span></h2>
+      <p class="line">Pick the tracks to check against. The spectrum takes each track’s colour wherever that track is louder than this one. Compare all of it, only the hits, or only the sustain.</p>
+      <img class="t-img" src="/plugins/media/hero.jpg" alt="The vocal’s spectrum tinted where the guitars and keys are louder." loading="lazy">
+    </div>
+    <div class="t" data-b="4">
+      <p class="then">Now the track in the way.</p>
+      <h2>Any band can listen<br>to <span class="hit">any track.</span></h2>
+      <p class="line">Open a band’s Dynamics, Transient or Drive and pick another EQ from the list, before or after that EQ’s own processing. No sidechain routing, and each band can pick its own.</p>
+      <img class="t-img" src="/plugins/media/menu.jpg" alt="A band’s Listens to sheet listing other tracks’ EQs, with Pre and Post on the chosen one." loading="lazy">
+    </div>
+    <div class="t" data-b="5">
+      <h2>Duck one band.<br><span class="hit">Only while the other plays.</span></h2>
+      <p class="line">Set a threshold and a range. When the other track crosses the threshold, this one band dips, then recovers at the release you set. The rest of the track doesn’t move.</p>
+      <img class="t-img" src="/plugins/media/key.jpg" alt="The guitars’ band at 2.4 kHz dipping as the vocal sings, with the vocal’s spectrum overlaid." loading="lazy">
+    </div>
+    <div class="t" data-b="6">
+      <p class="then">Same trick, down low.</p>
+      <h2>Duck the lows.<br><span class="hit">Only on the hits.</span></h2>
+      <p class="line">Put a dynamic band on one track’s low end and let it listen to another. Only that band moves, so the rest of the track keeps its level and tone.</p>
+      <ul class="cx"><li>Each band its own key</li><li>Pre or Post</li><li>Another band</li><li>Hits</li><li>Drive</li></ul><p class="tiny">Works between EQs in the same host process.</p>
+      <img class="t-img" src="/plugins/media/bass.jpg" alt="The bass’s band at 70 Hz dipping with the drums." loading="lazy">
+    </div>
+    <div class="t" data-b="7">
+      <p class="then">It’s out front now. And some notes bite.</p>
+      <h2>Don’t dull every note.<br><span class="ring">Catch what rings.</span></h2>
+      <p class="line">Static holds its gain. Dynamic moves the whole band with its level. Spectral lets each frequency follow its own level, so only what rings moves. One click switches a band.</p>
+      <img class="t-img" src="/plugins/media/vocal.jpg" alt="A spectral band cutting only the frequencies that stand out." loading="lazy">
+    </div>
+    <div class="t" data-b="8">
+      <p class="then">On to the next track. It’s boxy, but you can’t lose the attack.</p>
+      <h2>One band.<br>Two <span class="hit">gains.</span></h2>
+      <p class="line">A band can split its sound into the hit and everything after it, with a gain for each. Lift the attack and pull down the ring at the same frequency.</p>
+      <div class="gains"><div><b class="hit">Boost</b><span>on the hit</span></div><div><b class="ring">Cut</b><span>in the ring</span></div></div>
+      <img class="t-img" src="/plugins/media/hits.jpg" alt="A band at 3.6 kHz jumping on each hit and easing back." loading="lazy">
+    </div>
+    <div class="t" data-b="9">
+      <h2>One for the hit.<br>One for <span class="ring">the rest.</span></h2>
+      <p class="line">Transient and Sustain are on every band, and a lane shows you the hits. The detector can listen to this band, another band, the whole input or another EQ.</p>
+      <img class="t-img" src="/plugins/media/hits.jpg" alt="Two band cards on their Transient tabs." loading="lazy">
+    </div>
+    <div class="t" data-b="10">
+      <p class="then">A little air on top?</p>
+      <h2>Type it.</h2>
+      <p class="line"><span class="mono">hs 10k +2</span>, Return. The band plays on the curve as you type. Use a type, a frequency or note, a gain and a Q in any order, like <span class="mono">lc 80 48</span> or <span class="mono">notch A1</span>.</p>
+      <img class="t-img" src="/plugins/media/type.jpg" alt="Typing hs 10k +2 into the Add band box." loading="lazy">
+    </div>
+    <div class="t" data-b="11">
+      <p class="then">Clean. Maybe too clean.</p>
+      <h2>Drive one band.<br><span class="hit">Leave the rest.</span></h2>
+      <p class="line">Only what the band covers goes in, and only the distortion comes back, so the band’s own level stays at its gain. Up to 36 dB, with its own Tone and Mix.</p>
+      <ul class="cx"><li>Drive</li><li>Tone</li><li>Mix</li><li>Bias</li><li>Apply to</li><li>Follows</li></ul>
+      <img class="t-img" src="/plugins/media/fx.jpg" alt="A band’s Drive tab: Shape, Drive, Tone, Mix, Bias, Apply to and Follows." loading="lazy">
+    </div>
+    <div class="t" data-b="12">
+      <h2>Six ways to<br><span class="hit">drive a band.</span></h2>
+      <p class="line">Round it off, fold it back or crush it. Bias adds even harmonics, Spread drives left and right differently, and Dynamics undoes the squash and keeps the harmonics.</p>
+      <ul class="cx"><li>Tube</li><li>Tape</li><li>Fuzz</li><li>Fold</li><li>Rectify</li><li>Crush</li></ul><p class="tiny">Pictures show what each shape does as you change it.</p>
+      <img class="t-img" src="/plugins/media/shapes.jpg" alt="A band’s Drive sheet: its shapes as icons, with pictures of the shape, its level and its Drive as it follows." loading="lazy">
+    </div>
+    <div class="t" data-b="13">
+      <p class="then">Not sure what it’s adding?</p>
+      <h2>Hold to hear<br><span class="hit">it alone.</span></h2>
+      <p class="line">Hold the power button on a band’s Dynamics, Transient, Drive or Feedback, and you hear only what it changes. Let go and the mix is back. A click still turns it on or off.</p>
+      <img class="t-img" src="/plugins/media/alone.jpg" alt="Holding the Drive power button: the band’s readout reads Drive alone, and the spectrum drops to what Drive adds." loading="lazy">
+    </div>
+    <div class="t" data-b="14">
+      <p class="then">Or let it ring.</p>
+      <h2>Feedback.<br><span class="ring">Inside the band.</span></h2>
+      <p class="line">Tuned, the band rings at a pitch set by its frequency. In ms, it echoes on just that band. The loop runs through the band’s own filter and a soft clip, so it never runs away.</p>
+      <img class="t-img" src="/plugins/media/feedback.jpg" alt="A band’s Feedback tab: Tuned or ms, Amount and Time, and a line saying what you’ll hear." loading="lazy">
+    </div>
+    <div class="t" data-b="15">
+      <h2>Then place<br>the <span class="hit">change.</span></h2>
+      <p class="line">Pan and Width move only what the band adds or takes away, so the rest of the track stays put. A band can also run on Stereo, Left, Right, Mid or Side.</p>
+      <img class="t-img" src="/plugins/media/channel.jpg" alt="A band’s Channel sheet: Stereo, Left, Right, Mid or Side, with Pan and Width." loading="lazy">
+    </div>
+    <div class="t" data-b="16">
+      <p class="then">Then the whole sound.</p>
+      <h2>Eight<br><span class="hit">characters.</span></h2>
+      <p class="line">A final stage after the bands: Clean, Subtle, Warm, Tape, Tube, Fuzz, Fold or Crush. Up to 36 dB of drive, on everything, only the hits, or only the rest.</p>
+      <img class="t-img" src="/plugins/media/char.jpg" alt="The Character sheet in the band card’s place: eight shapes, Drive, Tone, Mix, Bias, Spread, Dynamics, Follows and Apply to." loading="lazy">
+    </div>
+    <div class="t" data-b="17">
+      <p class="then">It all sits right now. But it sits still.</p>
+      <h2>Make it <span class="hit">move.</span></h2>
+      <p class="line">21 modulators, from LFOs and envelope followers to step sequencers and XY pads, up to 16 on one EQ. Drag one onto a band’s frequency, gain, Q, threshold, drive or feedback, or onto another modulator.</p>
+      <img class="t-img" src="/plugins/media/mods/lfo.jpg" alt="The 21 modulator cards." loading="lazy">
+    </div>
+    <div class="t" data-b="18">
+      <p class="then">Then the message: “Can we get this in 7.1.4?”</p>
+      <h2>Same EQ.<br><span class="ring">Up to 16 channels.</span></h2>
+      <p class="line">Every band picks a lane: stereo, left, right, mid or side. Each lane draws its own curve, so you can see what each part of the sound is getting.</p>
+      <ul class="cx"><li>Stereo</li><li>Left · Right</li><li>Mid · Side</li></ul>
+      <img class="t-img" src="/plugins/media/lanes.jpg" alt="Bands on Mid, Left, Right and Side, each lane drawing its own curve." loading="lazy">
+    </div>
+    <div class="t" data-b="19">
+      <h2>Every speaker.<br>One curve.</h2>
+      <p class="line">On a surround track, pick a band’s speakers on a map of the room, or a group such as the tops. Shared and Differences work on what they have in common, or what sets them apart.</p>
+      <ul class="cx"><li>5.1</li><li>7.1</li><li>5.1.4</li><li>7.1.4</li><li>up to 16 ch</li></ul><p class="tiny">Surround in Logic and REAPER; up to 16 numbered channels in REAPER.</p>
+      <img class="t-img" src="/plugins/media/speakers.jpg" alt="A band’s Channel sheet on a 7.1.4 bed: a map of the speakers, with the four tops chosen." loading="lazy">
+    </div>
+    <div class="t t-center" data-b="20">
+      <p class="then">That was one session.</p>
+      <h2>This one’s <span class="hit">yours.</span></h2>
+      <img class="t-img" src="/plugins/media/hero.jpg" alt="The full window." loading="lazy">
+    </div>
+  </div>
+</div>
+<div class="after">
+  <div class="wrap">
+    <section class="feat try" id="yours" aria-labelledby="h-try">
+      <div class="head">
+        <h2 id="h-try">Start with<br><span class="hit">the drums.</span></h2>
+        <p>The drum bus, running in your browser. Whatever you change carries over into the whole song below.</p>
+      </div>
+      <div class="try-call" id="tryCall">
+        <div></div>
+        <div>
+          <strong>Not a video. The real EQ.</strong>
+          <p>Press Play, grab a band and change anything. It runs the same engine as the plugin, so what you hear here is exactly what you’d hear in your DAW.</p>
+        </div>
+      </div>
+      <svg class="try-arrow" id="tryArrow" aria-hidden="true"><path class="ta-line" pathLength="1" fill="none"/><path class="ta-head"/><rect class="ta-ring" rx="8"/></svg>
+      <div class="try-frame">
+      <iframe data-demo src="/plugins/try/eq-demo.html" title="Make Things EQ on the drums of Not Alone" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+    <div class="try-note"><span>Drums from “Not Alone” by Fredy V · CC BY 4.0 · bass on the sidechain</span><span class="try-small">Best on a bigger screen.</span><a href="/plugins/try/eq-demo.html">Open full screen ↗</a></div>
+    </section>
+    <section class="feat try" id="mix" aria-labelledby="h-mix" style="padding-top: clamp(64px, 8vw, 110px)">
+      <div class="head">
+        <h2 id="h-mix">Now the<br><span class="ring">whole song.</span></h2>
+        <p>Your drum EQ comes with you, on the Drums track. Press Play and get the vocal back.</p>
+      </div>
+      <div class="try-frame">
+      <iframe data-demo src="/plugins/try/eq-demo.html#mix" title="Make Things EQ on every part of Not Alone" loading="lazy" allow="autoplay; fullscreen" allowfullscreen style="height: 820px"></iframe>
+    </div>
+    <div class="try-note"><span>All 23 tracks of “Not Alone” by Fredy V · CC BY 4.0</span><span class="try-small">Best on a bigger screen.</span><a href="/plugins/try/eq-demo.html#mix">Open full screen ↗</a></div>
+    </section>
+    <ul class="nums" aria-label="In numbers">
+    <li><b>24</b><span>bands</span></li>
+    <li><b>3</b><span>phase modes</span></li>
+    <li><b>8</b><span>characters</span></li>
+    <li><b>21</b><span>modulators</span></li>
+    <li><b>7.1.4</b><span>surround</span></li>
+  </ul>
+    <section class="made" aria-label="How Make Things EQ was made">
+    <p class="h">Conceived, designed, tested and perfected by <em>humans.</em></p>
+    <p class="m">Coded and optimized by <em>machines.</em></p>
+  </section>
+  </div>
+  <section class="closer" id="get" aria-labelledby="h-get">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="wrap">
+      <h2 id="h-get">Now try it on<br><span class="hit">your mix.</span></h2>
+      <div class="plans-wrap">
+        <div class="plans-blur" inert aria-hidden="true">
+          <div class="plans">
+            <article class="plan main">
+              <h3>Make Things EQ</h3>
+              <p class="kind">Yours to keep</p>
+              <p class="price"><b>$00</b><s>$000</s><span>launch price</span></p>
+              <ul>
+                <li>Every feature on this page</li>
+                <li>AU and VST3, Mac and Windows</li>
+                <li>Updates for this version</li>
+                <li>An upgrade to the next one</li>
+              </ul>
+              <span class="pill">Get the EQ</span>
+            </article>
+            <article class="plan">
+              <h3>All Make Things plugins</h3>
+              <p class="kind">Subscription</p>
+              <p class="price"><b>$00</b><span>a month, or $00 a year</span></p>
+              <ul>
+                <li>The EQ and every other plugin</li>
+                <li>Every update, while subscribed</li>
+              </ul>
+              <span class="pill ghost">Get all plugins</span>
+            </article>
+            <article class="plan">
+              <h3>Make Things groups</h3>
+              <p class="kind">For members</p>
+              <p class="price"><b>$00</b><span>while you’re a member</span></p>
+              <ul>
+                <li>Included with your group</li>
+                <li>Download it from your account</li>
+              </ul>
+              <span class="pill ghost">Sign in</span>
+            </article>
+          </div>
+          <p class="trial">Try it free for 00 days, with full sound.</p>
+        </div>
+        <div class="sticker-rail"><p class="sticker">Coming Soon</p></div>
+      </div>
+    </div>
+  </section>
+  <div class="wrap">
+    <footer class="foot">
+      <span>Make Things EQ · AU · VST3 · macOS 12+ · Windows · Designed by humans, coded by AI agents · “Not Alone” by Fredy V, CC BY 4.0</span>
+      <a href="/plugins/">All Make Things plugins →</a>
+    </footer>
+  </div>
+</div>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // The Try it frames: each tells this page how tall it is (normal or full window), and when it starts playing, so the
+  // others stop (one sounds at a time).
+  const tryFrames = [...document.querySelectorAll('iframe[data-demo]')];
+  let session = {};
+  try { session = JSON.parse(localStorage.getItem('mt-eq-session-v2') ?? '{}'); } catch { /* start new */ }
+  const saveSession = () => { try { localStorage.setItem('mt-eq-session-v2', JSON.stringify(session)); } catch { /* not kept */ } };
+  addEventListener('message', (e) => {
+    const f = tryFrames.find((x) => x.contentWindow === e.source);
+    if (!f || !e.data) return;
+    if (e.data.type === 'mt-eq-demo-height') { const h = Math.max(200, Math.min(2400, Number(e.data.height) || 0)); if (h) f.style.height = h + 'px'; }
+    if (e.data.type === 'mt-eq-demo-playing') tryFrames.forEach((x) => { if (x !== f) x.contentWindow?.postMessage({ type: 'mt-eq-demo-stop' }, '*'); });
+    // One session across the demos: what one frame changes goes to the other, and to a frame that loads later.
+    if (e.data.type === 'mt-eq-demo-state' && e.data.batch) { Object.assign(session, e.data.batch); saveSession(); tryFrames.forEach((x) => { if (x !== f) x.contentWindow?.postMessage({ type: 'mt-eq-demo-apply', batch: e.data.batch }, '*'); }); }
+    if (e.data.type === 'mt-eq-demo-ready' && Object.keys(session).length) f.contentWindow?.postMessage({ type: 'mt-eq-demo-apply', batch: session }, '*');
+  });
+
+
+
+
+
+  // The stage: scroll is a position along the beats; between two beats the camera flies, the clips crossfade and the text
+  // changes. Only the clips in view play.
+  const BEATS = [{"c": "hero", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0, "strip": 0, "hero": 1, "center": 0, "restart": 0, "id": "top"}, {"c": "inst", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "see"}, {"c": "inst", "r": [73, 108, 408, 770], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hero", "r": [420, 330, 1400, 770], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "menu", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "room"}, {"c": "key", "r": [960, 250, 1900, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "bass", "r": [140, 280, 1060, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "vocal", "r": [900, 250, 1850, 720], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "edge"}, {"c": "hits", "r": [800, 240, 1800, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "drums"}, {"c": "hits", "r": [640, 765, 1165, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "type", "r": [760, 500, 1360, 800], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 1, "id": null}, {"c": "fx", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "drive"}, {"c": "shapes", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "alone", "r": [430, 330, 1130, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "feedback", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "channel", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "char", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hits", "r": [20, 56, 2000, 1190], "len": 3.4, "dim": 1, "strip": 1, "hero": 0, "center": 0, "restart": 0, "id": "lift"}, {"c": "lanes", "r": [113, 108, 1985, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "ask"}, {"c": "speakers", "r": [978, 778, 1244, 1184], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hero", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0.6, "strip": 0, "hero": 0, "center": 1, "restart": 0, "id": "end"}];
+  const stage = document.getElementById('stage'), scroller = document.getElementById('scroller'), world = document.getElementById('world');
+  const dimmer = document.getElementById('dimmer'), scrim = document.getElementById('scrim'), mc = document.getElementById('modCarousel'), track = document.getElementById('modTrack');
+  const bar = document.getElementById('bar'), markIn = document.getElementById('markIn');
+  const layers = Object.fromEntries([...world.querySelectorAll('[data-clip]')].map((e) => [e.dataset.clip, e]));
+  const texts = [...stage.querySelectorAll('.t')];
+  const links = [...bar.querySelectorAll('a')];
+  const html = document.documentElement;
+  const lp = document.getElementById('lp'), lpEq = document.getElementById('lpEq'), lpSlot = document.getElementById('lpSlot');
+  const lpHead = document.getElementById('lpHead'), lpCap = document.getElementById('lpCap'), lpSide = document.getElementById('lpSide');
+  const markTag = document.querySelector('.mark span'), markPill = document.querySelector('.mark-in .pill');
+  const backLinks = [...document.querySelectorAll('.mark, .foot a')];
+  // /plugins/eq/ is the EQ page and any other address the list; the page's own anchors only change the hash.
+  const isListRoute = () => !/\/plugins\/eq\/?$/.test(location.pathname);
+  const pushRoute = (url) => { try { history.pushState(null, '', url); } catch { /* the host doesn't allow it: the page still moves */ } };
+  const listUrl = () => '/plugins/';
+  const setTitle = (list) => { document.title = list ? 'Make Things Plugins' : 'Make Things EQ'; document.querySelector('link[rel=canonical]').href = 'https://makethings.audio/plugins/' + (list ? '' : 'eq/'); };
+  let hydrated = false;
+  function hydrate() {
+    if (hydrated) return;
+    hydrated = true;
+    document.querySelectorAll('[data-poster]').forEach((v) => { v.poster = v.dataset.poster; });
+    document.querySelectorAll('[data-src]').forEach((v) => { v.src = v.dataset.src; });
+  }
+  if (reduce) {
+    document.documentElement.classList.add('still');
+    hydrate();
+    const syncStill = () => { const list = isListRoute(); if (html.classList.contains('list') !== list) { html.classList.toggle('list', list); scrollTo(0, 0); } setTitle(list); };
+    syncStill();
+    addEventListener('popstate', syncStill);
+    lpEq.addEventListener('click', (e) => { e.preventDefault(); pushRoute('/plugins/eq/'); syncStill(); });
+    backLinks.forEach((a) => a.addEventListener('click', (e) => { if (html.classList.contains('list')) return; e.preventDefault(); pushRoute(listUrl()); syncStill(); }));
+    Object.values(layers).forEach((v) => { if (v.pause) v.pause(); });
+    texts[BEATS.findIndex((b) => b.id === 'lift')].after(mc);
+    return;
+  }
+  const W0 = 1000, ASPECT = 1770 / 3080;
+  const norm = ([x0, y0, x1, y1]) => [(x0 * 1.56 - 20) / 3080, (y0 * 1.56 - 88) / 3080, (x1 * 1.56 - 20) / 3080, (y1 * 1.56 - 88) / 3080];
+  const smooth = (t) => { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
+  let vw = 0, vh = 0, step = 0, wide = true, cams = [], starts = [], total = 0;
+  // 'list': the plugin list. 'moving': flying between it and the EQ page. 'eq': the scroll page, exactly as it is on its own.
+  let mode = isListRoute() ? 'list' : 'eq', entry = mode === 'eq' ? 1 : 0, entryRaf = 0, listCam = null;
+  function layout() {
+    vw = stage.clientWidth; vh = stage.clientHeight;
+    wide = vw / vh >= 1.2 && vw >= 860;
+    stage.classList.toggle('wide', wide); stage.classList.toggle('tall', !wide);
+    step = vh;
+    starts = []; total = 0;
+    BEATS.forEach((b) => { starts.push(total); total += b.len; });
+    scroller.style.height = (html.classList.contains('list') ? vh : (total - 1 + BEATS[BEATS.length - 1].len * 0) * step + vh) + 'px';
+    cams = BEATS.map((b) => {
+      const [u0, v0, u1, v1] = norm(b.r);
+      let sx0, sy0, sx1, sy1;
+      if (b.hero) { sx0 = vw * (wide ? .06 : .03); sx1 = vw * (wide ? .94 : .97); sy0 = vh * (wide ? .62 : .62); sy1 = vh * 1.5; }
+      else if (b.center) { sx0 = vw * .08; sx1 = vw * .92; sy0 = vh * .08; sy1 = vh * .92; }
+      else if (wide) { sx0 = vw * .37; sx1 = vw * .985; sy0 = vh * .08; sy1 = vh * .97; }
+      else { sx0 = vw * .03; sx1 = vw * .97; sy0 = 48; sy1 = vh * .5; }
+      const z = Math.min((sx1 - sx0) / ((u1 - u0) * W0), (sy1 - sy0) / ((v1 - v0) * W0));
+      return { cx: (u0 + u1) / 2 * W0, cy: (v0 + v1) / 2 * W0, sx: (sx0 + sx1) / 2, sy: b.hero ? sy0 + (v1 - v0) * W0 * z / 2 : (sy0 + sy1) / 2, lz: Math.log(z), rot: b.hero ? 22 : 0 };
+    });
+    // The list's camera: the whole window, flat, exactly over its slot.
+    if (html.classList.contains('list')) {
+      const r = lpSlot.getBoundingClientRect(), st = stage.getBoundingClientRect();
+      listCam = { cx: W0 / 2, cy: 575 / 2, sx: r.left - st.left + r.width / 2, sy: r.top - st.top + r.height / 2, lz: Math.log(r.width / W0), rot: 0 };
+    }
+  }
+  const scrollTopOf = () => scroller.getBoundingClientRect().top + scrollY;
+  const beatAt = (id) => BEATS.findIndex((b) => b.id === id);
+  links.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const i = beatAt(a.dataset.go); scrollTo({ top: scrollTopOf() + starts[i] * step, behavior: 'auto' }); }));
+  let pos = 0, shown = -1, active = new Set();
+  function activate(names) {
+    const want = new Set(names);
+    for (const [n, el] of Object.entries(layers)) {
+      if (!el.pause) continue;
+      if (want.has(n)) { if (el.preload !== 'auto') el.preload = 'auto'; if (el.paused) { const p = el.play(); if (p) p.catch(() => {}); } }
+      else if (!el.paused) el.pause();
+    }
+    active = want;
+  }
+  function render(p) {
+    // p: position in beat units along `starts`; a long beat holds, the fly-over is always one unit before the next beat.
+    let i = 0;
+    for (let k = 0; k < BEATS.length; k++) if (p >= starts[k]) i = k;
+    const b = BEATS[i], next = BEATS[Math.min(i + 1, BEATS.length - 1)];
+    const f = p - starts[i], flyFrom = b.len - 1;
+    // Every beat holds first, so its text can be read. The first has nothing to wait for: its flight starts on the first
+    // pixel and its start isn't flat, so the page answers the first scroll. It lands where it always did, at .72.
+    const t0 = Math.min(1, f / .72);
+    const e = i === BEATS.length - 1 ? 0 : i === 0 ? .4 * t0 + .6 * smooth(t0) : smooth((f - flyFrom - .28) / .44);
+    const fade = i === 0 ? smooth((f - .28) / .44) : e;
+    const A = cams[i], C = cams[Math.min(i + 1, BEATS.length - 1)];
+    const lerp = (x, y) => x + (y - x) * e;
+    const dist = Math.hypot(A.cx - C.cx, A.cy - C.cy) / W0;
+    const dolly = Math.min(.5, dist * .9) * Math.sin(Math.PI * e);
+    const z = Math.exp(lerp(A.lz, C.lz) - dolly);
+    const cx = lerp(A.cx, C.cx), cy = lerp(A.cy, C.cy), sx = lerp(A.sx, C.sx), sy = lerp(A.sy, C.sy), rot = lerp(A.rot, C.rot);
+    world.style.transform = 'translate3d(' + (sx - cx * z).toFixed(2) + 'px,' + (sy - cy * z).toFixed(2) + 'px,0) rotateX(' + rot.toFixed(2) + 'deg) scale(' + z.toFixed(4) + ')';
+    // Clips: the coming one fades in over the current one.
+    for (const [n, el] of Object.entries(layers)) {
+      const isA = n === b.c, isB = n === next.c && n !== b.c && fade > 0;
+      el.style.visibility = isA || isB ? 'visible' : 'hidden';
+      el.style.opacity = isB ? fade.toFixed(3) : isA ? '1' : '0';
+      el.style.zIndex = isB ? 2 : 1;
+    }
+    const names = [b.c, next.c];
+    if (BEATS[i + 2] && f > flyFrom) names.push(BEATS[i + 2].c);
+    activate(names);
+    if (i !== shown) { const r = layers[b.c]; if (b.restart && r.pause) { try { r.currentTime = 0; } catch { /* not ready */ } } shown = i; }
+    // Text, dim and scrim
+    const textEdge = (t) => smooth(t / .22);
+    texts.forEach((el, k) => {
+      const B = BEATS[k], st = starts[k], en = st + B.len;
+      const inT = k === 0 ? 1 : textEdge(p - (st - .2));
+      // The headline leaves as the scroll starts: it lifts from the first pixel, and is gone before it reaches the logo row or the window reaches it.
+      const outT = k === BEATS.length - 1 ? 1 : k === 0 ? 1 - smooth((p - .04) / .36) : textEdge((en - .22) - p);
+      const o = Math.min(inT, outT);
+      if (o <= .001) { el.style.visibility = 'hidden'; el.style.opacity = 0; return; }
+      el.style.visibility = 'visible'; el.style.opacity = o.toFixed(3);
+      const dy = k === 0 ? -p * step * .13 : (1 - inT) * 26 - (1 - outT) * 26;
+      el.style.transform = (wide && !B.hero) ? 'translate3d(0,calc(-50% + ' + dy.toFixed(1) + 'px),0)' : B.center ? 'translate3d(0,calc(-50% + ' + dy.toFixed(1) + 'px),0)' : 'translate3d(0,' + dy.toFixed(1) + 'px,0)';
+    });
+    const dimNow = lerp(b.dim || 0, next.dim || 0);
+    dimmer.style.opacity = (dimNow * .86).toFixed(3);
+    const scrimOf = (x) => (x.hero || x.center ? 0 : 1);
+    scrim.style.opacity = (scrimOf(b) + (scrimOf(next) - scrimOf(b)) * fade).toFixed(3);
+    // The modulators: flown past by the scroll.
+    const li = beatAt('lift'), sl = starts[li], el = BEATS[li].len;
+    const sOn = Math.min(smooth((p - sl + .3) / .5), smooth((sl + el - .2 - p) / .4));
+    if (sOn > .001) {
+      mc.style.visibility = 'visible'; mc.style.opacity = sOn.toFixed(3);
+      const tw = track.scrollWidth, startX = wide ? vw * .4 : vw * .85;
+      const q = Math.min(1, Math.max(0, (p - sl + .3) / (el + .1)));
+      track.style.transform = 'translate3d(' + (startX + (vw * .1 - tw - startX) * q).toFixed(1) + 'px,0,0)';
+    } else { mc.style.visibility = 'hidden'; mc.style.opacity = 0; }
+    // The bar and the mark
+    const barOn = smooth((p - .55) / .3);
+    bar.style.opacity = barOn.toFixed(3); bar.style.pointerEvents = barOn > .5 ? 'auto' : 'none';
+    markIn.style.opacity = (1 - barOn).toFixed(3); markIn.style.pointerEvents = barOn > .5 ? 'none' : 'auto';
+    let cur = -1;
+    links.forEach((a, k) => { if (p + .3 >= starts[beatAt(a.dataset.go)]) cur = k; });
+    links.forEach((a, k) => {
+      a.classList.toggle('on', k === cur); a.classList.toggle('done', k < cur);
+      a.parentElement.classList.toggle('on', k === Math.max(cur, 0));
+      if (k === cur) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+  }
+  // Between the list and the EQ page: the same window on the same camera, from its slot to the page's first pose. At 1 this
+  // draws what render(0) draws, so the handover can't be seen.
+  function renderEntry(x) {
+    const A = listCam, C = cams[0], lerp = (a, b) => a + (b - a) * x;
+    const z = Math.exp(lerp(A.lz, C.lz));
+    world.style.transform = 'translate3d(' + (lerp(A.sx, C.sx) - lerp(A.cx, C.cx) * z).toFixed(2) + 'px,' + (lerp(A.sy, C.sy) - lerp(A.cy, C.cy) * z).toFixed(2) + 'px,0) rotateX(' + lerp(A.rot, C.rot).toFixed(2) + 'deg) scale(' + z.toFixed(4) + ')';
+    for (const [n, el] of Object.entries(layers)) { const on = n === 'hero'; el.style.visibility = on ? 'visible' : 'hidden'; el.style.opacity = on ? '1' : '0'; el.style.zIndex = 1; }
+    texts.forEach((el, k) => {
+      if (k) { el.style.visibility = 'hidden'; el.style.opacity = 0; return; }
+      const o = smooth((x - .5) / .5);
+      el.style.visibility = o > .001 ? 'visible' : 'hidden'; el.style.opacity = o.toFixed(3);
+      el.style.transform = 'translate3d(0,' + ((1 - o) * 22).toFixed(1) + 'px,0)';
+    });
+    dimmer.style.opacity = '0.000'; scrim.style.opacity = '0.000';
+    mc.style.visibility = 'hidden'; mc.style.opacity = 0;
+    bar.style.opacity = '0.000'; bar.style.pointerEvents = 'none';
+    markIn.style.opacity = '1.000'; markIn.style.pointerEvents = 'auto';
+    const away = smooth(x / .4), tag = smooth((x - .6) / .4);
+    lpHead.style.opacity = (1 - away).toFixed(3); lpHead.style.transform = 'translate3d(0,' + (-34 * x).toFixed(1) + 'px,0)';
+    lpCap.style.opacity = (1 - smooth(x / .25)).toFixed(3);
+    lpSide.style.opacity = (1 - away).toFixed(3); lpSide.style.transform = wide ? 'translate3d(' + (80 * x).toFixed(1) + 'px,0,0)' : 'translate3d(0,' + (80 * x).toFixed(1) + 'px,0)';
+    lp.inert = x > .5; lp.style.visibility = x >= 1 ? 'hidden' : 'visible';
+    markTag.style.opacity = tag.toFixed(3); markPill.style.opacity = tag.toFixed(3); markPill.style.pointerEvents = tag > .5 ? 'auto' : 'none';
+  }
+  const easeInOut = (q) => (q < .5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2);
+  function tween(to, ms, done) {
+    cancelAnimationFrame(entryRaf);
+    const from = entry; let t0 = 0;
+    const tick = (now) => {
+      t0 = t0 || now;
+      const q = Math.min(1, (now - t0) / ms);
+      entry = from + (to - from) * easeInOut(q);
+      renderEntry(entry);
+      if (q < 1) entryRaf = requestAnimationFrame(tick); else { entryRaf = 0; if (done) done(); }
+    };
+    entryRaf = requestAnimationFrame(tick);
+  }
+  function enterEq(push) {
+    if (mode === 'eq' || mode === 'moving') return;
+    if (push) pushRoute('/plugins/eq/');
+    mode = 'moving';
+    hydrate();
+    activate(['hero', 'inst']);
+    tween(1, 1250, () => {
+      mode = 'eq';
+      html.classList.remove('list');
+      layout();
+      markTag.style.opacity = ''; markPill.style.opacity = ''; markPill.style.pointerEvents = '';
+      lp.style.visibility = '';
+      last = -1; pos = 0; render(0);
+      setTitle(false);
+      document.getElementById('h1').focus({ preventScroll: true });
+    });
+  }
+  function leaveEq() {
+    if (mode !== 'eq') return;
+    const atTop = scrollY < 4 && pos < .001;
+    tryFrames.forEach((x) => x.contentWindow?.postMessage({ type: 'mt-eq-demo-stop' }, '*'));
+    track.querySelectorAll('video').forEach((v) => v.pause());
+    cancelAnimationFrame(raf); raf = 0;
+    html.classList.add('list');
+    scrollTo(0, 0);
+    layout();
+    setTitle(true);
+    if (!atTop) { entry = 0; renderEntry(0); mode = 'list'; activate(['hero']); return; }
+    mode = 'moving'; entry = 1; renderEntry(1);
+    tween(0, 1050, () => { mode = 'list'; activate(['hero']); });
+  }
+  lpEq.addEventListener('click', (e) => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); enterEq(true); });
+  // Hovering wakes the page behind it, and the window leans back a little toward where it's going.
+  lpEq.addEventListener('pointerenter', () => { hydrate(); if (mode === 'list') tween(.05, 320); });
+  lpEq.addEventListener('pointerleave', () => { if (mode === 'list') tween(0, 320); });
+  lpEq.addEventListener('focus', hydrate);
+  backLinks.forEach((a) => a.addEventListener('click', (e) => { if (mode !== 'eq') return; e.preventDefault(); pushRoute(listUrl()); leaveEq(); }));
+  addEventListener('popstate', () => { if (isListRoute()) leaveEq(); else enterEq(false); });
+  // The modulator clips play while they are on screen.
+  const io = new IntersectionObserver((es) => es.forEach((en) => { const v = en.target; if (en.isIntersecting && mc.style.visibility === 'visible') { const r = v.play(); if (r) r.catch(() => {}); } else v.pause(); }), { threshold: .05 });
+  track.querySelectorAll('video').forEach((v) => io.observe(v));
+  const target = () => Math.max(0, Math.min(total - 1 + .001, (scrollY - scrollTopOf()) / step));
+  let raf = 0, last = -1, lastT = 0;
+  function frame(now) {
+    raf = 0;
+    const t = target();
+    const dt = lastT ? Math.min(.25, (now - lastT) / 1000) : 1 / 60;
+    lastT = now;
+    pos += (t - pos) * (1 - Math.exp(-dt / .07));
+    if (Math.abs(t - pos) < .0008) pos = t;
+    if (pos !== last) { render(pos); last = pos; }
+    if (pos !== t) raf = requestAnimationFrame(frame); else lastT = 0;
+  }
+  const kick = () => { if (mode === 'eq' && !raf) raf = requestAnimationFrame(frame); };
+  addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', () => { layout(); if (mode === 'eq') { last = -1; pos = target(); render(pos); } else renderEntry(entry); });
+  document.getElementById('h1').tabIndex = -1;
+  document.getElementById('h1').style.outline = 'none';
+  layout();
+  if (mode === 'eq') { hydrate(); pos = target(); render(pos); }
+  else {
+    activate(['hero']); renderEntry(0);
+    // Once the list has settled, fetch the rest, so the flight never waits for it.
+    addEventListener('load', () => setTimeout(hydrate, 1500), { once: true });
+  }
+  window.__stage = { mode: () => mode, entry: () => entry, setEntry: (x) => { entry = x; renderEntry(x); }, hero: () => layers.hero, pos: () => pos, starts: () => starts, step: () => step, top: scrollTopOf, playing: () => Object.entries(layers).filter(([, v]) => v.pause && !v.paused).map(([n]) => n) };
+})();
+</script>
+<script>
+(() => {
+  const sec = document.getElementById('yours'), svg = document.getElementById('tryArrow');
+  const frame = sec.querySelector('iframe[data-demo]'), hit = sec.querySelector('.head .hit'), call = document.getElementById('tryCall'), para = sec.querySelector('.head p');
+  const [line, head, ring] = svg.children;
+  // The button is at this spot in the demo at every size; it's read from the demo itself once that has loaded.
+  let play = { x: 12, y: 10, w: 65, h: 23 };
+  function readPlay() {
+    try {
+      const b = frame.contentDocument?.querySelector('.kb-eq-lab-transport button');
+      if (!b) return false;
+      const r = b.getBoundingClientRect();
+      if (!r.width) return false;
+      play = { x: r.x, y: r.y, w: r.width, h: r.height };
+      return true;
+    } catch { return false; }
+  }
+  function draw() {
+    const s = sec.getBoundingClientRect(), f = frame.getBoundingClientRect();
+    if (!f.width) return;
+    const rectOf = (e) => { const r = e.getBoundingClientRect(); return { l: r.left - s.left, t: r.top - s.top, r: r.right - s.left, b: r.bottom - s.top }; };
+    const h = rectOf(hit), c = rectOf(call), p = rectOf(para);
+    const fx = f.left - s.left, fy = f.top - s.top;
+    const box = { x: fx + play.x, y: fy + play.y, w: play.w, h: play.h };
+    const one = p.l < h.r; // headline and text stacked
+    const S = { x: h.r + 14, y: (h.t + h.b) / 2 + 6 };
+    const E = { x: box.x + box.w / 2, y: box.y - 9 };
+    // Out to the right of the headline, keeping clear of the callout: its column when it has one, else the page's edge.
+    const callLeft = rectOf(call.querySelector('strong')).l;
+    const rail = callLeft > S.x + 60 ? (one ? callLeft - 30 : Math.min(S.x + 150, callLeft - 30)) : f.right - s.left - 6;
+    const under = one ? c.b : h.b;
+    const sweep = under + (fy - under) * (one ? .5 : .58);
+    const Q = { x: rail, y: (S.y + sweep) / 2 }, R = { x: (rail + E.x) / 2, y: sweep };
+    const d = 'M' + S.x + ' ' + S.y
+      + ' C' + (S.x + (rail - S.x) * .75) + ' ' + (S.y - 12) + ' ' + rail + ' ' + (S.y + (Q.y - S.y) * .3) + ' ' + Q.x + ' ' + Q.y
+      + ' C' + rail + ' ' + (Q.y + (sweep - Q.y) * .8) + ' ' + (R.x + (rail - R.x) * .5) + ' ' + sweep + ' ' + R.x + ' ' + R.y
+      + ' C' + (E.x + (R.x - E.x) * .45) + ' ' + sweep + ' ' + E.x + ' ' + (sweep + (E.y - sweep) * .25) + ' ' + E.x + ' ' + (E.y - 14);
+    line.setAttribute('d', d);
+    const w = one ? 13 : 17;
+    head.setAttribute('d', 'M' + (E.x - w) + ' ' + (E.y - 20) + ' L' + (E.x + w) + ' ' + (E.y - 20) + ' L' + E.x + ' ' + (E.y + 4) + ' Z');
+    ring.setAttribute('x', box.x - 5); ring.setAttribute('y', box.y - 5); ring.setAttribute('width', box.w + 10); ring.setAttribute('height', box.h + 10);
+    svg.classList.add('ready');
+  }
+  new ResizeObserver(draw).observe(sec);
+  frame.addEventListener('load', () => { let n = 0; const t = setInterval(() => { if (readPlay() || ++n > 60) { clearInterval(t); draw(); } }, 300); });
+  // It draws itself when the reader arrives, and goes away once they've pressed Play.
+  new IntersectionObserver((es, io) => { if (es.some((e) => e.isIntersecting)) { svg.classList.add('go'); io.disconnect(); } }, { threshold: .35 }).observe(call);
+  addEventListener('message', (e) => { if (e.data && e.data.type === 'mt-eq-demo-playing' && sec.parentElement.querySelector('iframe[data-demo]') && [...document.querySelectorAll('iframe[data-demo]')].some((x) => x.contentWindow === e.source)) svg.classList.add('played'); });
+  draw();
+})();
+</script>
+</body>
+</html>
