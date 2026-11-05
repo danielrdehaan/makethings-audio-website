@@ -134,6 +134,7 @@ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 .plan p { margin: 0; }
 .plan .pill { margin-top: auto; }
 .plan-price { font: 700 26px/1.2 var(--f-display); letter-spacing: -0.02em; color: var(--ink); }
+.plan-tax { font: 400 14px/1 var(--f-body); letter-spacing: 0; color: var(--muted); white-space: nowrap; }
 .sect h2 + .plans { margin-top: 20px; }
 
 /* /downloads */

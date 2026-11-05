@@ -38,6 +38,19 @@ function loadPaddle() {
   })
 }
 
+// Whether tax sits on top of the price depends on the buyer's country: Paddle adds it in the US and Canada, and it's already inside
+// the price in the UK, the EU and Japan. It's on top when the subtotal is still the listed price. "Including tax" is the fallback
+// because the total always does include it.
+function priceLine(line, every) {
+  const total = line.formattedTotals?.total ?? ''
+  if (!(Number(line.totals?.tax) > 0)) return [`${total}${every}`]
+  const listed = line.price?.unitPrice
+  const onTop = listed && line.totals.subtotal === listed.amount && line.formattedTotals?.subtotal
+  return onTop
+    ? [`${line.formattedTotals.subtotal}${every} `, h('span', { class: 'plan-tax' }, 'plus tax')]
+    : [`${total}${every} `, h('span', { class: 'plan-tax' }, 'including tax')]
+}
+
 async function open() {
   let paddle
   try {
@@ -69,7 +82,7 @@ async function open() {
       // One or the other, by Paddle's rule. The same customer keeps one portal and one payment history.
       customer: customerId ? { id: customerId } : { email: session.user.email },
       customData: { user_id: session.user.id },
-      settings: { displayMode: 'overlay', theme: 'dark', allowLogout: false, successUrl: `${location.origin}/account/?purchased=1` },
+      settings: { displayMode: 'overlay', theme: 'dark', allowLogout: false, successUrl: `${location.origin}/account/?purchased=1&since=${Date.now()}` },
     })
   }
   const priceEls = new Map()
@@ -100,7 +113,7 @@ async function open() {
       if (!el) continue
       const cycle = line.price?.billingCycle
       const every = cycle?.frequency === 1 && cycle.interval === 'month' ? ' a month' : cycle?.frequency === 1 && cycle.interval === 'year' ? ' a year' : ''
-      el.textContent = `${line.formattedTotals?.total ?? ''}${every}`
+      el.replaceChildren(...priceLine(line, every))
     }
   } catch { /* the check below */ }
   for (const el of priceEls.values()) if (el.textContent === '…') el.textContent = 'Price shown at checkout'

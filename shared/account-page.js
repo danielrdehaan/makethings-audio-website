@@ -15,7 +15,8 @@ document.getElementById('who').textContent = session.user.email ?? ''
 document.getElementById('signOut').addEventListener('click', () => signOut())
 
 const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false, justPaid: new URLSearchParams(location.search).get('purchased') === '1' }
-async function load() {
+// quiet: a look again in the background, whose failure leaves what's on the page alone.
+async function load({ quiet = false } = {}) {
   const [sources, products, machines, billing, sales, claim] = await Promise.allSettled([
     sb.rpc('my_plugin_entitlements'),
     sb.from('plugin_products').select('id, name'),
@@ -33,7 +34,7 @@ async function load() {
     state.machines = rows(machines).sort((a, b) => (b.last_seen_at ?? b.created_at).localeCompare(a.last_seen_at ?? a.created_at))
     state.names = Object.fromEntries((products.status === 'fulfilled' ? products.value.data ?? [] : []).map((p) => [p.id, p.name]))
   } catch {
-    root.replaceChildren(h('p', { class: 'msg err' }, 'Couldn’t load your account. Try again in a moment.'))
+    if (!quiet) root.replaceChildren(h('p', { class: 'msg err' }, 'Couldn’t load your account. Try again in a moment.'))
     return false
   }
   if (billing.status === 'fulfilled' && billing.value.status === 200) {
@@ -155,8 +156,16 @@ function noSubscription() {
   return state.salesOpen ? ['You don’t have a subscription. ', h('a', { href: '/buy/' }, 'See the plans'), '.'] : ['You don’t have a subscription. Subscriptions aren’t on sale yet.']
 }
 
+// What's running, or else the latest that ended. Cancelling and subscribing again leaves old rows behind, and an old one's Renew
+// beside a live subscription would invite paying twice. Past payments stay under Purchases.
+function currentSubscriptions() {
+  const all = state.billing?.subscriptions ?? []
+  const live = all.filter((s) => s.status !== 'canceled')
+  return live.length ? live : all.slice(0, 1)
+}
+
 function subscriptionSection() {
-  const subs = state.billing?.subscriptions ?? []
+  const subs = currentSubscriptions()
   return section('subscription', 'Subscription', null,
     state.billingFailed ? h('p', { class: 'msg err' }, 'Couldn’t load your subscription. Try again in a moment.')
     : subs.length ? h('ul', { class: 'rows' }, subs.map(subscriptionRow))
@@ -192,7 +201,7 @@ function purchasesSection() {
   const list = state.billing?.transactions ?? []
   return section('purchases', 'Purchases', null,
     state.billingFailed ? h('p', { class: 'msg err' }, 'Couldn’t load your purchases. Try again in a moment.')
-    : list.length === 0 ? h('p', { class: 'empty' }, state.justPaid ? 'Your receipt will be here as soon as your purchase is set up.' : 'No purchases yet. Your receipts will be here when there are some.')
+    : list.length === 0 ? h('p', { class: 'empty' }, state.justPaid ? 'Your receipt will be here in a minute or two.' :'No purchases yet. Your receipts will be here when there are some.')
     : h('table', { class: 'table' },
       h('thead', {}, h('tr', {}, ['Date', 'Item', 'Amount', 'Receipt'].map((t) => h('th', { scope: 'col' }, t)))),
       h('tbody', {}, list.map((t) => h('tr', { 'data-transaction': t.id ?? '' },
@@ -208,9 +217,17 @@ function profileSection() {
 }
 
 // Back from checkout. The webhook usually takes seconds and may already have landed, so this asks whether a payment has just arrived
-// rather than whether the count changed. Waits and looks again a few times; a person who bought something shouldn't have to reload.
+// rather than whether the count changed. A subscription counts as soon as it's live: in Paddle's sandbox its receipt came 47 seconds
+// after it, and the plugins work without one. Keeps looking; a person who bought something shouldn't have to reload.
+// /buy says when checkout opened, so an earlier receipt isn't taken for this one. The two minutes allow for this computer's clock.
+const CHECKOUT_OPENED = Number(new URLSearchParams(location.search).get('since')) || 0
 const JUST_NOW_MS = 30 * 60 * 1000
-const paymentArrived = () => (state.billing?.transactions ?? []).some((t) => Date.now() - new Date(t.date).getTime() < JUST_NOW_MS)
+const receiptArrived = () => {
+  const from = CHECKOUT_OPENED ? CHECKOUT_OPENED - 2 * 60 * 1000 : Date.now() - JUST_NOW_MS
+  return (state.billing?.transactions ?? []).some((t) => new Date(t.date).getTime() >= from)
+}
+const paymentArrived = () => receiptArrived() || (state.billing?.subscriptions ?? []).some((s) => s.status === 'active' || s.status === 'trialing')
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 function checkMark() {
   const NS = 'http://www.w3.org/2000/svg'
@@ -254,12 +271,20 @@ async function awaitPurchase() {
   if (!paymentArrived()) {
     show('waiting')
     for (let i = 0; i < 8 && !paymentArrived(); i++) {
-      await new Promise((resolve) => setTimeout(resolve, 2500))
-      if (await load()) { render(); show('waiting') }
+      await wait(2500)
+      if (await load({ quiet: true })) { render(); show('waiting') }
     }
   }
   show(paymentArrived() ? 'done' : 'late')
   history.replaceState(null, '', location.pathname + location.hash)
+  // For two more minutes: the plugins if they were late, then the receipt, without replaying the card once it's up.
+  for (let i = 0; i < 24 && !receiptArrived(); i++) {
+    await wait(5000)
+    const done = paymentArrived()
+    if (!(await load({ quiet: true }))) continue
+    if (!done && paymentArrived()) { render(); show('done') }
+    else if (receiptArrived()) document.getElementById('purchases')?.replaceWith(purchasesSection())
+  }
 }
 
 // Last: load and render read the constants above, which a top-level await before their lines would leave unset.
