@@ -1,6 +1,6 @@
 // /login: email and password on the same accounts as StemShare. There is no sign-up (invitations only). A password
 // reset opens on StemShare's /reset-password, the one page that finishes it.
-import { APP_URL } from './config.js'
+import { APP_URL, PLUGIN_API, TURNSTILE_SITE_KEY } from './config.js'
 import { h, safeNext, sb } from './account.js'
 
 const next = safeNext(new URLSearchParams(location.search).get('next'))
@@ -34,12 +34,19 @@ function signInForm(email) {
     },
   }, emailField, passwordField, msg, h('div', { class: 'form-foot' }, go,
     h('button', { class: 'link', type: 'button', onclick: () => resetForm(form.elements.email.value) }, 'Forgot password?')))
+  const invite = h('p', { class: 'fine' }, 'Use the same email and password as StemShare. Accounts are by invitation for now.')
   root.replaceChildren(
     h('h1', {}, 'Sign in'),
     h('p', { class: 'lede' }, 'Download your plugins and manage your computers.'),
     form,
-    h('p', { class: 'fine' }, 'Use the same email and password as StemShare. Accounts are by invitation for now.'),
+    invite,
   )
+  // Offer sign-up only once sales are open; until then this line stands, including if the answer doesn't come.
+  if (TURNSTILE_SITE_KEY) {
+    fetch(`${PLUGIN_API}/sales-status`).then((r) => (r.ok ? r.json() : null)).then((status) => {
+      if (status?.open === true) invite.replaceChildren('New here? ', h('a', { href: '/signup/' }, 'Create an account'), '. Use the same email and password as StemShare if you have one.')
+    }).catch(() => {})
+  }
 }
 
 function resetForm(email) {
