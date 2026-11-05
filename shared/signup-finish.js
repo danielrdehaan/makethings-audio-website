@@ -8,6 +8,7 @@ const root = document.getElementById('app')
 const params = new URLSearchParams(location.search)
 const tokenHash = params.get('token_hash')?.trim() ?? ''
 const type = params.get('type')?.trim() ?? ''
+const plan = /^[a-z0-9-]{1,30}$/.test(params.get('plan') ?? '') ? params.get('plan') : null
 
 if (!tokenHash || type !== 'invite') problem('That link isn’t complete. Open it from the email again, or start over.')
 else form()
@@ -52,7 +53,7 @@ function form() {
           .update({ display_name: name, terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION })
           .eq('id', data.user.id)
         if (profileError) { say('Couldn’t save your details. Try again.'); return }
-        location.replace('/downloads/')
+        location.replace(plan ? `/buy/?plan=${plan}` : '/downloads/')
       } catch {
         say('Couldn’t reach the sign-in service. Try again in a moment.')
       }

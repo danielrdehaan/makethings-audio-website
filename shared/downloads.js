@@ -12,7 +12,7 @@ const ABOUT = { eq: '/plugins/eq/' }
 
 const TRIAL_RULE = 'Trials are one per person and one per computer.'
 const WHY_NOT = {
-  ended: ['You don’t have a licence for the plugins right now. ', h('a', { href: '/plugins/' }, 'See the plans'), '.'],
+  ended: ['You don’t have a licence for the plugins right now. ', h('a', { href: '/buy/' }, 'See the plans'), '.'],
   not_licensed: 'Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.',
   no_release: 'No installer has been published yet. Check back soon.',
   error: 'Couldn’t reach the download service. Try again in a moment.',

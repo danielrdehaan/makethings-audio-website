@@ -5,8 +5,10 @@ import { PLUGIN_API, TURNSTILE_SITE_KEY } from './config.js'
 import { h, sb } from './account.js'
 
 const root = document.getElementById('app')
+// A plan chosen on /buy before there was an account: the email's link comes back to it.
+const plan = new URLSearchParams(location.search).get('plan')
 const { data: existing } = await sb.auth.getSession()
-if (existing.session) location.replace('/account/')
+if (existing.session) location.replace(plan ? `/buy/?plan=${encodeURIComponent(plan)}` : '/account/')
 else if (await salesOpen()) form()
 else closed()
 
@@ -57,7 +59,7 @@ function form() {
         const r = await fetch(`${PLUGIN_API}/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, turnstileToken: token }),
+          body: JSON.stringify({ email, turnstileToken: token, ...(plan ? { plan } : {}) }),
         })
         if (r.ok) { sent(email); return }
         const { error } = await r.json().catch(() => ({}))
@@ -78,7 +80,7 @@ function form() {
     h('h1', {}, 'Create account'),
     h('p', { class: 'lede' }, 'We’ll email you a link to choose a password. Your 14-day trial starts the first time you sign in from a plugin, with no card needed.'),
     el,
-    h('p', { class: 'fine' }, 'Already have an account? ', h('a', { href: '/login/' }, 'Sign in'), '.'),
+    h('p', { class: 'fine' }, 'Already have an account? ', h('a', { href: plan ? `/login/?next=${encodeURIComponent(`/buy/?plan=${plan}`)}` : '/login/' }, 'Sign in'), '.'),
   )
   loadTurnstile().then((turnstile) => {
     widget = turnstile.render(check, {

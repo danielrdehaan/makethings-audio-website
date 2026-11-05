@@ -3,8 +3,8 @@
 // A licence covers the user, not one computer: every signed-in computer is activated for all the user's plugins, and
 // the server doesn't know which ones are installed there. The page says only that.
 //
-// Billing: no payment provider is connected yet (Paddle, docs/plugin-product-plan.md §4.4), so GET /api/plugin/billing
-// answers empty lists today and the subscription and purchase rows below don't appear for anyone.
+// Billing comes from GET /api/plugin/billing: what Paddle's webhooks recorded, with fresh links to Paddle's customer portal, which
+// is where cancelling and changing a payment method happen.
 import { APP_URL, PLUGIN_API } from './config.js'
 import { dateOf, h, httpsOnly, pluginApi, requireSession, sb, signOut } from './account.js'
 
@@ -71,7 +71,7 @@ function describeSource(s) {
 
 function noPlugins() {
   if (!state.salesOpen) return ['Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.']
-  if (state.trialClaimed) return ['Your trial has ended. ', h('a', { href: '/plugins/' }, 'See the plans'), ' to keep going. Your sessions keep their settings.']
+  if (state.trialClaimed) return ['Your trial has ended. ', h('a', { href: '/buy/' }, 'See the plans'), ' to keep going. Your sessions keep their settings.']
   return ['Your 14-day trial is ready, with no card needed. ', h('a', { href: '/downloads/' }, 'Download a plugin'), ' and sign in from it to start. Trials are one per person and one per computer, so a computer that’s already had one won’t start another.']
 }
 
@@ -146,9 +146,9 @@ const STATUS = {
 }
 
 function noSubscription() {
-  if (state.sources.length && state.sources.every((s) => s.source === 'trial')) return ['You don’t have a subscription. You’re on a trial, so nothing is charged. ', h('a', { href: '/plugins/' }, 'See the plans'), '.']
+  if (state.sources.length && state.sources.every((s) => s.source === 'trial')) return ['You don’t have a subscription. You’re on a trial, so nothing is charged. ', h('a', { href: '/buy/' }, 'See the plans'), '.']
   if (state.sources.length) return ['You don’t have a subscription. Your plugins come through the access above, so there’s nothing to renew or cancel.']
-  return state.salesOpen ? ['You don’t have a subscription. ', h('a', { href: '/plugins/' }, 'See the plans'), '.'] : ['You don’t have a subscription. Subscriptions aren’t on sale yet.']
+  return state.salesOpen ? ['You don’t have a subscription. ', h('a', { href: '/buy/' }, 'See the plans'), '.'] : ['You don’t have a subscription. Subscriptions aren’t on sale yet.']
 }
 
 function subscriptionSection() {
@@ -163,7 +163,8 @@ function subscriptionRow(s) {
   const [label, tone] = STATUS[s.status] ?? [String(s.status ?? ''), 'off']
   const price = money(s.price?.amount, s.price?.currency)
   const every = s.price?.interval === 'year' ? 'a year' : s.price?.interval === 'month' ? 'a month' : ''
-  const when = s.endsAt ? `Ends ${dateOf(s.endsAt)}` : s.renewsAt ? `Renews ${dateOf(s.renewsAt)}` : ''
+  const ended = s.status === 'canceled'
+  const when = s.endsAt ? `${ended ? 'Ended' : 'Ends'} ${dateOf(s.endsAt)}` : s.renewsAt ? `Renews ${dateOf(s.renewsAt)}` : ''
   const links = s.links ?? {}
   const act = (url, text, ghost = true) => httpsOnly(url) && h('a', { class: ghost ? 'pill ghost small' : 'pill small', href: url, rel: 'noopener' }, text)
   return h('li', { class: 'row', 'data-subscription': s.id ?? '' },
@@ -173,10 +174,15 @@ function subscriptionRow(s) {
     h('div', { class: 'row-actions' },
       act(links.renew, 'Renew', false),
       act(links.updatePayment, 'Update payment method', s.status !== 'past_due'),
-      act(links.cancel, 'Cancel subscription')))
+      act(links.cancel, 'Cancel subscription'),
+      // A cancellation already scheduled: taking it back happens in the portal.
+      s.endsAt && !ended && act(links.manage, 'Keep subscription')),
+    s.status === 'past_due' && h('p', { class: 'msg err small', style: 'flex-basis:100%' }, 'Your last payment didn’t go through. Update your payment method to keep your plugins.'))
 }
 
 // ── Purchases ────────────────────────────────────────────────────────────────────────────────────
+
+const RECEIPT_TAG = { refunded: 'Refunded', partially_refunded: 'Partly refunded', chargeback: 'Disputed' }
 
 function purchasesSection() {
   const list = state.billing?.transactions ?? []
@@ -187,7 +193,7 @@ function purchasesSection() {
       h('thead', {}, h('tr', {}, ['Date', 'Item', 'Amount', 'Receipt'].map((t) => h('th', { scope: 'col' }, t)))),
       h('tbody', {}, list.map((t) => h('tr', { 'data-transaction': t.id ?? '' },
         h('td', { class: 'muted' }, dateOf(t.date)),
-        h('td', {}, t.description ?? 'Purchase', t.status === 'refunded' && h('span', { class: 'tag off', style: 'margin-left:8px' }, 'Refunded')),
+        h('td', {}, t.description || 'Purchase', RECEIPT_TAG[t.status] && h('span', { class: 'tag off', style: 'margin-left:8px' }, RECEIPT_TAG[t.status])),
         h('td', {}, money(t.amount, t.currency)),
         h('td', {}, httpsOnly(t.receiptUrl) ? h('a', { href: t.receiptUrl, rel: 'noopener' }, 'Receipt') : '—'))))))
 }
@@ -197,6 +203,21 @@ function profileSection() {
     'Your name, password and account settings are on ', h('a', { href: `${APP_URL}/profile` }, 'StemShare'), '.'))
 }
 
+// Back from checkout: the webhook usually takes seconds, so say what's happening and look again a few times.
+async function awaitPurchase() {
+  const seen = () => (state.billing?.transactions.length ?? 0) + (state.billing?.subscriptions.length ?? 0)
+  const before = seen()
+  root.prepend(h('p', { class: 'trial-note', 'data-purchase-note': true, role: 'status' }, h('strong', {}, 'Thanks. '), 'Your payment went through, and your plugins are being set up.'))
+  for (let i = 0; i < 8 && seen() === before; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 2500))
+    if (await load()) { render(); root.prepend(h('p', { class: 'trial-note', 'data-purchase-note': true, role: 'status' }, h('strong', {}, 'Thanks. '), seen() > before ? 'You’re all set. Your plugins are ready to use.' : 'Your payment went through, and your plugins are being set up.')) }
+  }
+  history.replaceState(null, '', location.pathname + location.hash)
+}
+
 // Last: load and render read the constants above, which a top-level await before their lines would leave unset.
-if (await load()) render()
+if (await load()) {
+  render()
+  if (new URLSearchParams(location.search).get('purchased') === '1') void awaitPurchase()
+}
 if (location.hash.length > 1) document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: 'start' })

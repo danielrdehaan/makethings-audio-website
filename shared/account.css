@@ -85,6 +85,14 @@ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 .check input { width: 18px; height: 18px; flex: none; margin: 1px 0 0; box-shadow: none; accent-color: var(--accent); }
 .fine { margin: 26px 0 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
 
+/* /buy */
+.plans { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.plan { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 12px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); }
+.plan p { margin: 0; }
+.plan .pill { margin-top: auto; }
+.plan-price { font: 700 26px/1.2 var(--f-display); letter-spacing: -0.02em; color: var(--ink); }
+.sect h2 + .plans { margin-top: 20px; }
+
 /* /downloads */
 .trial-note { margin: 0 0 clamp(26px, 4vw, 40px); padding: 14px 18px; border-radius: 10px; background: var(--raise); box-shadow: inset 0 0 0 1px var(--line); font-size: 15.5px; }
 .trial-note strong { color: var(--ink); font-weight: 600; }
