@@ -10,7 +10,9 @@ const LINK_LIFE_MS = 14 * 60 * 1000 // a little under the links' 15 minutes
 const INSTALLS = { modular: 'Modular, Modular FX and Modular MIDI' }
 const ABOUT = { eq: '/plugins/eq/' }
 
+const TRIAL_RULE = 'Trials are one per person and one per computer.'
 const WHY_NOT = {
+  ended: ['You don’t have a licence for the plugins right now. ', h('a', { href: '/plugins/' }, 'See the plans'), '.'],
   not_licensed: 'Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.',
   no_release: 'No installer has been published yet. Check back soon.',
   error: 'Couldn’t reach the download service. Try again in a moment.',
@@ -29,8 +31,8 @@ try {
   say(WHY_NOT.error)
 }
 
-function say(text) {
-  root.replaceChildren(h('p', { class: 'empty' }, text))
+function say(what) {
+  root.replaceChildren(h('p', { class: 'empty' }, what))
 }
 
 function show(status, data) {
@@ -38,15 +40,19 @@ function show(status, data) {
     ? Object.entries(data.products).map(([id, p]) => productOf(id, p)).filter(Boolean)
     : []
   if (!products.length) {
-    say(status === 200 || data.error === 'no_release' ? WHY_NOT.no_release : data.error === 'not_licensed' ? WHY_NOT.not_licensed : WHY_NOT.error)
+    say(status === 200 || data.error === 'no_release' ? WHY_NOT.no_release
+      : data.error === 'not_licensed' ? (data.salesOpen === true ? WHY_NOT.ended : WHY_NOT.not_licensed)
+      : WHY_NOT.error)
     return
   }
-  root.replaceChildren(
+  root.replaceChildren(...[
+    data.trialAvailable === true && h('p', { class: 'trial-note', 'data-trial-note': true },
+      h('strong', {}, 'Your 14-day trial is ready. '), `It starts the first time you sign in from a plugin, with no card needed. ${TRIAL_RULE}`),
     ...products.map(productCard),
     h('section', { class: 'sect' },
       h('h3', {}, 'After installing'),
       h('p', { class: 'sect-note', style: 'margin-top:6px' }, 'Open a plugin in your DAW and choose ', h('strong', {}, 'Sign in to Make Things'), '. You can sign in on up to 3 computers, and manage them on ', h('a', { href: '/account/#computers' }, 'your account'), '.')),
-  )
+  ].filter(Boolean))
   // The cards arrived after the page, so the browser's own jump to #<id> found nothing.
   if (location.hash.length > 1) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: 'start' })
   // A link left open past its life answers with an error from storage: load fresh ones instead of following it.

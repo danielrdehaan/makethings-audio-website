@@ -5,7 +5,7 @@
 //
 // Billing: no payment provider is connected yet (Paddle, docs/plugin-product-plan.md §4.4), so GET /api/plugin/billing
 // answers empty lists today and the subscription and purchase rows below don't appear for anyone.
-import { APP_URL } from './config.js'
+import { APP_URL, PLUGIN_API } from './config.js'
 import { dateOf, h, httpsOnly, pluginApi, requireSession, sb, signOut } from './account.js'
 
 const MACHINE_LIMIT = 3
@@ -14,14 +14,19 @@ const session = await requireSession()
 document.getElementById('who').textContent = session.user.email ?? ''
 document.getElementById('signOut').addEventListener('click', () => signOut())
 
-const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false }
+const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false }
 async function load() {
-  const [sources, products, machines, billing] = await Promise.allSettled([
+  const [sources, products, machines, billing, sales, claim] = await Promise.allSettled([
     sb.rpc('my_plugin_entitlements'),
     sb.from('plugin_products').select('id, name'),
     sb.from('plugin_machines').select('id, name, created_at, last_seen_at').eq('user_id', session.user.id).is('revoked_at', null),
     pluginApi('billing'),
+    fetch(`${PLUGIN_API}/sales-status`).then((r) => (r.ok ? r.json() : null)),
+    sb.from('plugin_trial_claims').select('ends_at'),
   ])
+  // Neither of these may stop the page: they only choose the words.
+  state.salesOpen = sales.status === 'fulfilled' && sales.value?.open === true
+  state.trialClaimed = claim.status === 'fulfilled' && (claim.value.data?.length ?? 0) > 0
   const rows = (r) => { if (r.status === 'rejected' || r.value.error) throw new Error('load'); return r.value.data ?? [] }
   try {
     state.sources = rows(sources)
@@ -64,11 +69,17 @@ function describeSource(s) {
   return until ? `Active until ${until}` : 'Active'
 }
 
+function noPlugins() {
+  if (!state.salesOpen) return ['Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.']
+  if (state.trialClaimed) return ['Your trial has ended. ', h('a', { href: '/plugins/' }, 'See the plans'), ' to keep going. Your sessions keep their settings.']
+  return ['Your 14-day trial is ready, with no card needed. ', h('a', { href: '/downloads/' }, 'Download a plugin'), ' and sign in from it to start. Trials are one per person and one per computer, so a computer that’s already had one won’t start another.']
+}
+
 function pluginsSection() {
   const ids = productIds()
   return section('plugins', 'Your plugins', null,
     ids.length === 0
-      ? h('p', { class: 'empty' }, 'Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.')
+      ? h('p', { class: 'empty' }, ...noPlugins())
       : h('ul', { class: 'rows' }, ids.map((id) => h('li', { class: 'row', 'data-product': id },
         h('div', { class: 'row-main' }, h('h3', {}, nameOf(id)),
           state.sources.filter((s) => s.product_id === id).map((s) => h('p', { class: 'muted small' }, describeSource(s)))),
@@ -134,14 +145,18 @@ const STATUS = {
   active: ['Active', 'ok'], trialing: ['Trial', 'ok'], past_due: ['Payment overdue', 'warn'], paused: ['Paused', 'warn'], canceled: ['Cancelled', 'off'],
 }
 
+function noSubscription() {
+  if (state.sources.length && state.sources.every((s) => s.source === 'trial')) return ['You don’t have a subscription. You’re on a trial, so nothing is charged. ', h('a', { href: '/plugins/' }, 'See the plans'), '.']
+  if (state.sources.length) return ['You don’t have a subscription. Your plugins come through the access above, so there’s nothing to renew or cancel.']
+  return state.salesOpen ? ['You don’t have a subscription. ', h('a', { href: '/plugins/' }, 'See the plans'), '.'] : ['You don’t have a subscription. Subscriptions aren’t on sale yet.']
+}
+
 function subscriptionSection() {
   const subs = state.billing?.subscriptions ?? []
   return section('subscription', 'Subscription', null,
     state.billingFailed ? h('p', { class: 'msg err' }, 'Couldn’t load your subscription. Try again in a moment.')
     : subs.length ? h('ul', { class: 'rows' }, subs.map(subscriptionRow))
-    : h('p', { class: 'empty' }, state.sources.length
-      ? 'You don’t have a subscription. Your plugins come through the access above, so there’s nothing to renew or cancel.'
-      : 'You don’t have a subscription. Subscriptions aren’t on sale yet.'))
+    : h('p', { class: 'empty' }, ...noSubscription()))
 }
 
 function subscriptionRow(s) {
