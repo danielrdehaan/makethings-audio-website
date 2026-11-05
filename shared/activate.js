@@ -61,7 +61,10 @@ function asking(c, machineName) {
   return [
     h('p', { class: 'lede' }, 'A Make Things plugin on this computer is asking to use your account:'),
     h('p', { class: 'machine', 'data-machine-asking': true }, machineName),
-    h('p', { class: 'fine', style: 'margin-top:0' }, `Code ${shown(c)}. Approve it only if you just chose Sign in to Make Things in a plugin and this code matches the one it shows.`),
+    h('div', { class: 'device-code' },
+      h('p', { class: 'device-code-label' }, 'Your plugin should show this code'),
+      h('p', { class: 'device-code-value', 'data-code': true }, shown(c))),
+    h('p', { class: 'fine', style: 'margin-top:0' }, 'Approve only if you just chose Sign in to Make Things in a plugin and it shows this same code.'),
   ]
 }
 

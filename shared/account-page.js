@@ -14,7 +14,7 @@ const session = await requireSession()
 document.getElementById('who').textContent = session.user.email ?? ''
 document.getElementById('signOut').addEventListener('click', () => signOut())
 
-const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false }
+const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false, justPaid: new URLSearchParams(location.search).get('purchased') === '1' }
 async function load() {
   const [sources, products, machines, billing, sales, claim] = await Promise.allSettled([
     sb.rpc('my_plugin_entitlements'),
@@ -66,10 +66,12 @@ function describeSource(s) {
   if (s.source === 'grant') return until ? `Given to you until ${until}` : 'Given to you'
   if (s.source === 'subscription') return 'Through your subscription'
   if (s.source === 'trial') return until ? `Trial, until ${until}` : 'Trial'
+  if (s.source === 'purchase') return 'Yours to keep'
   return until ? `Active until ${until}` : 'Active'
 }
 
 function noPlugins() {
+  if (state.justPaid) return ['Your plugins will be here as soon as your purchase is set up.']
   if (!state.salesOpen) return ['Your account doesn’t include the plugins. They aren’t on sale yet: for now they come with groups that have them switched on, or by invitation. Ask whoever runs your group if you should have them.']
   if (state.trialClaimed) return ['Your trial has ended. ', h('a', { href: '/buy/' }, 'See the plans'), ' to keep going. Your sessions keep their settings.']
   return ['Your 14-day trial is ready, with no card needed. ', h('a', { href: '/downloads/' }, 'Download a plugin'), ' and sign in from it to start. Trials are one per person and one per computer, so a computer that’s already had one won’t start another.']
@@ -146,7 +148,9 @@ const STATUS = {
 }
 
 function noSubscription() {
+  if (state.justPaid && !state.sources.length) return ['If you just subscribed, it’ll be here as soon as your purchase is set up.']
   if (state.sources.length && state.sources.every((s) => s.source === 'trial')) return ['You don’t have a subscription. You’re on a trial, so nothing is charged. ', h('a', { href: '/buy/' }, 'See the plans'), '.']
+  if (state.sources.length && state.sources.every((s) => s.source === 'purchase')) return ['You don’t have a subscription. What you bought is yours to keep, so nothing renews.']
   if (state.sources.length) return ['You don’t have a subscription. Your plugins come through the access above, so there’s nothing to renew or cancel.']
   return state.salesOpen ? ['You don’t have a subscription. ', h('a', { href: '/buy/' }, 'See the plans'), '.'] : ['You don’t have a subscription. Subscriptions aren’t on sale yet.']
 }
@@ -188,7 +192,7 @@ function purchasesSection() {
   const list = state.billing?.transactions ?? []
   return section('purchases', 'Purchases', null,
     state.billingFailed ? h('p', { class: 'msg err' }, 'Couldn’t load your purchases. Try again in a moment.')
-    : list.length === 0 ? h('p', { class: 'empty' }, 'No purchases yet. Your receipts will be here when there are some.')
+    : list.length === 0 ? h('p', { class: 'empty' }, state.justPaid ? 'Your receipt will be here as soon as your purchase is set up.' : 'No purchases yet. Your receipts will be here when there are some.')
     : h('table', { class: 'table' },
       h('thead', {}, h('tr', {}, ['Date', 'Item', 'Amount', 'Receipt'].map((t) => h('th', { scope: 'col' }, t)))),
       h('tbody', {}, list.map((t) => h('tr', { 'data-transaction': t.id ?? '' },
@@ -203,15 +207,58 @@ function profileSection() {
     'Your name, password and account settings are on ', h('a', { href: `${APP_URL}/profile` }, 'StemShare'), '.'))
 }
 
-// Back from checkout: the webhook usually takes seconds, so say what's happening and look again a few times.
-async function awaitPurchase() {
-  const seen = () => (state.billing?.transactions.length ?? 0) + (state.billing?.subscriptions.length ?? 0)
-  const before = seen()
-  root.prepend(h('p', { class: 'trial-note', 'data-purchase-note': true, role: 'status' }, h('strong', {}, 'Thanks. '), 'Your payment went through, and your plugins are being set up.'))
-  for (let i = 0; i < 8 && seen() === before; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 2500))
-    if (await load()) { render(); root.prepend(h('p', { class: 'trial-note', 'data-purchase-note': true, role: 'status' }, h('strong', {}, 'Thanks. '), seen() > before ? 'You’re all set. Your plugins are ready to use.' : 'Your payment went through, and your plugins are being set up.')) }
+// Back from checkout. The webhook usually takes seconds and may already have landed, so this asks whether a payment has just arrived
+// rather than whether the count changed. Waits and looks again a few times; a person who bought something shouldn't have to reload.
+const JUST_NOW_MS = 30 * 60 * 1000
+const paymentArrived = () => (state.billing?.transactions ?? []).some((t) => Date.now() - new Date(t.date).getTime() < JUST_NOW_MS)
+
+function checkMark() {
+  const NS = 'http://www.w3.org/2000/svg'
+  const svg = document.createElementNS(NS, 'svg')
+  svg.setAttribute('viewBox', '0 0 64 64')
+  svg.setAttribute('aria-hidden', 'true')
+  svg.setAttribute('class', 'done-mark')
+  const ring = document.createElementNS(NS, 'circle')
+  for (const [k, v] of Object.entries({ cx: 32, cy: 32, r: 28, class: 'done-ring' })) ring.setAttribute(k, v)
+  const tick = document.createElementNS(NS, 'path')
+  tick.setAttribute('d', 'M20 33.5 28.5 42 45 24')
+  tick.setAttribute('class', 'done-tick')
+  svg.append(ring, tick)
+  return svg
+}
+
+function purchaseCard(stage) {
+  if (stage === 'done') {
+    return h('section', { class: 'done', 'data-purchase-note': 'done', role: 'status' }, checkMark(),
+      h('div', { class: 'done-text' },
+        h('p', { class: 'done-thanks' }, 'Thanks.'),
+        h('h2', { class: 'done-title', tabindex: '-1' }, 'You’re all set.'),
+        h('p', { class: 'done-lede' }, 'Your plugins are ready to use.'),
+        h('div', { class: 'row-actions', style: 'margin-top:20px' },
+          h('a', { class: 'pill', href: '/downloads/' }, 'Download your plugins'))))
   }
+  return h('section', { class: 'done waiting', 'data-purchase-note': stage, role: 'status' }, h('span', { class: 'done-wait', 'aria-hidden': 'true' }),
+    h('div', { class: 'done-text' },
+      h('p', { class: 'done-thanks' }, 'Thanks.'),
+      h('p', { class: 'done-lede' }, stage === 'late'
+        ? 'Your payment went through. Your plugins are taking longer than usual to set up, so check back in a minute. If they aren’t here soon, get in touch.'
+        : 'Your payment went through, and your plugins are being set up.')))
+}
+
+async function awaitPurchase() {
+  const show = (stage) => {
+    root.querySelector('[data-purchase-note]')?.remove()
+    root.prepend(purchaseCard(stage))
+    if (stage === 'done') root.querySelector('.done-title')?.focus({ preventScroll: true })
+  }
+  if (!paymentArrived()) {
+    show('waiting')
+    for (let i = 0; i < 8 && !paymentArrived(); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 2500))
+      if (await load()) { render(); show('waiting') }
+    }
+  }
+  show(paymentArrived() ? 'done' : 'late')
   history.replaceState(null, '', location.pathname + location.hash)
 }
 
