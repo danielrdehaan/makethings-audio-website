@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Make Things Plugins</title>
 <script>if (!/\/plugins\/eq\/?$/.test(location.pathname)) document.documentElement.classList.add('list');</script>
-<meta name="description" content="Make Things plugins for your DAW: AU and VST3, for Mac and Windows.">
+<meta name="description" content="Make Things plugins for your DAW: AU and VST3 for Mac. Windows coming.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Make Things Plugins">
-<meta property="og:description" content="Make Things plugins for your DAW: AU and VST3, for Mac and Windows.">
+<meta property="og:description" content="Make Things plugins for your DAW: AU and VST3 for Mac. Windows coming.">
 <meta property="og:url" content="https://makethings.audio/plugins/">
 <link rel="canonical" href="https://makethings.audio/plugins/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -372,6 +372,29 @@ html.list .lp { display: flex; visibility: visible; }
 .stage.tall .lp-side { flex: none; flex-direction: row; }
 .stage.tall .lp-ph { flex: 1 1 0; }
 @media (max-height: 760px) { .stage.tall .lp-art { display: none; } .stage.tall .lp-head h1 { font-size: 30px; } .stage.tall .lp-head p { margin-top: 4px; } }
+/* The list's own close: the EQ page's statement, then the questions about it. Part of the list, not the EQ page. */
+.lp-faq { display: none; }
+html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; }
+.lp-faq .made { padding-block: clamp(64px, 9vw, 130px) clamp(72px, 10vw, 150px); }
+.lp-faq h2 { font: 700 clamp(30px, 3.6vw, 48px)/1.05 var(--f-display); letter-spacing: -0.035em; color: var(--ink); margin: 0 0 clamp(24px, 3vw, 40px); }
+.lp-faq dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: clamp(26px, 3.5vw, 44px) clamp(32px, 5vw, 72px); }
+.lp-faq dt { font: 600 clamp(18px, 1.7vw, 22px)/1.25 var(--f-display); letter-spacing: -0.02em; color: var(--ink); }
+.notify { padding-block: clamp(8px, 2vw, 24px) 0; scroll-margin-top: 12px; }
+.notify > p { margin: 0; max-width: 56ch; font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); }
+.notify form { display: grid; gap: 14px; margin-top: 22px; max-width: 420px; }
+.notify form[hidden], .notify [hidden] { display: none; }
+.notify label { display: grid; gap: 7px; font-size: 14.5px; color: var(--text); }
+.notify input { width: 100%; padding: 12px 14px; border: 0; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font: 400 16px/1.3 var(--f-body); }
+.notify input:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.notify button { justify-self: start; border: 0; cursor: pointer; }
+.notify button:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
+.notify-check { min-height: 65px; }
+.notify-msg { margin: 0; color: var(--hit); }
+.notify .notify-done { margin-top: 22px; color: var(--ring); }
+.notify-link { margin: 26px 0 0; text-align: center; font-size: clamp(15.5px, 1.3vw, 17px); }
+.lp-contact { margin: clamp(34px, 4vw, 52px) 0 0; font-size: clamp(15.5px, 1.3vw, 17px); color: var(--text); }
+.lp-faq dd { margin: 10px 0 0; font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); max-width: 62ch; }
+html.still.list .lp-faq { display: block; }
 /* While the list shows, the EQ page's name and pricing wait for it. */
 html.list .mark span, html.list .mark-in .pill { opacity: 0; pointer-events: none; }
 .mark span, .mark-in .pill { will-change: opacity; }
@@ -441,7 +464,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     <section class="lp" id="lp" aria-label="Make Things plugins">
       <div class="lp-head" id="lpHead">
         <h1>Plugins</h1>
-        <p>AU and VST3, for Mac and Windows.</p>
+        <p>AU and VST3 for Mac. Windows coming.</p>
       </div>
       <div class="lp-row">
         <a class="lp-eq" id="lpEq" href="/plugins/eq/">
@@ -457,13 +480,13 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
             <div class="lp-art" aria-hidden="true"></div>
             <h2>Make Things Dynamics</h2>
             <p>Compression and gating, a partner for the EQ.</p>
-            <em>Coming later</em>
+            <em>Coming</em>
           </div>
           <div class="lp-ph">
             <div class="lp-art" aria-hidden="true"></div>
             <h2>Make Things Modular</h2>
             <p>The whole rack as an instrument, an audio effect or a MIDI effect.</p>
-            <em>Page coming soon</em>
+            <em>Coming</em>
           </div>
         </div>
       </div>
@@ -642,7 +665,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     <li><b>7.1.4</b><span>surround</span></li>
   </ul>
     <section class="made" aria-label="How Make Things EQ was made">
-    <p class="h">Conceived, designed, tested and perfected by <em>humans.</em></p>
+    <p class="h">Conceived, designed, and perfected by <em>humans.</em></p>
     <p class="m">Coded and optimized by <em>machines.</em></p>
   </section>
   </div>
@@ -659,9 +682,8 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
               <p class="price"><b>$00</b><s>$000</s><span>launch price</span></p>
               <ul>
                 <li>Every feature on this page</li>
-                <li>AU and VST3, Mac and Windows</li>
+                <li>AU and VST3 for Mac, Windows coming</li>
                 <li>Updates for this version</li>
-                <li>An upgrade to the next one</li>
               </ul>
               <span class="pill">Get the EQ</span>
             </article>
@@ -690,15 +712,84 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
         </div>
         <div class="sticker-rail"><p class="sticker">Coming Soon</p></div>
       </div>
+      <p class="notify-link"><a href="/plugins/#notify">Get an email when they’re on sale →</a></p>
     </div>
   </section>
   <div class="wrap">
     <footer class="foot">
-      <span>Make Things EQ · AU · VST3 · macOS 12+ · Windows · Designed by humans, coded by AI agents · “Not Alone” by Fredy V, CC BY 4.0</span>
+      <span>Make Things EQ · AU · VST3 · macOS 12+ · Windows coming · Designed by humans, coded by AI agents · “Not Alone” by Fredy V, CC BY 4.0</span>
       <a href="/plugins/">All Make Things plugins →</a>
     </footer>
   </div>
 </div>
+<div class="lp-faq" id="faq">
+  <div class="wrap">
+    <section class="notify" id="notify" aria-labelledby="h-notify">
+      <h2 id="h-notify">Hear when they’re on sale</h2>
+      <p>They’re in beta with current students and StemShare moderators for now. Leave your email and we’ll tell you when they’re ready.</p>
+      <form id="notifyForm" hidden>
+        <label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+        <div class="notify-check" id="notifyCheck"></div>
+        <p class="notify-msg" role="alert" hidden></p>
+        <button class="pill" type="submit" disabled>Tell me</button>
+      </form>
+      <p id="notifyMail" style="margin-top:22px">Email <a href="mailto:support@makethings.audio">support@makethings.audio</a> and we’ll tell you.</p>
+    </section>
+    <section class="made" aria-label="How Make Things plugins are made">
+      <p class="h">Conceived, designed, and perfected by <em>humans.</em></p>
+      <p class="m">Coded and optimized by <em>machines.</em></p>
+    </section>
+    <h2 id="h-faq">FAQ</h2>
+    <dl>
+      <div>
+        <dt>Can I buy them yet?</dt>
+        <dd>Not yet. They’re in beta with current students and StemShare moderators. <a href="#notify">Leave your email</a> and we’ll tell you when they’re on sale.</dd>
+      </div>
+      <div>
+        <dt>Was AI used to make these plugins?</dt>
+        <dd>Yes. The code in Make Things plugins is written by AI coding agents. The exceptions are the open-source libraries they build on, like JUCE. We’d rather you hear that from us.</dd>
+      </div>
+      <div>
+        <dt>Is there AI inside the plugins?</dt>
+        <dd>Nope. Just local DSP running on your machine.</dd>
+      </div>
+      <div>
+        <dt>Can I try them first?</dt>
+        <dd>Yes. You get 14 days free, with full sound and no card. The trial starts the first time you sign in from a plugin, and each person and each computer gets one.</dd>
+      </div>
+      <div>
+        <dt>How does licensing work?</dt>
+        <dd>Sign in once on each computer, up to 3, and every Make Things plugin works there. They renew your licence online about once a week, and keep working offline for up to 30 days.</dd>
+      </div>
+      <div>
+        <dt>What do I get if I buy one outright?</dt>
+        <dd>That plugin, with every update to its major version: EQ 1 gets every 1.x update. A future major version would be a separate purchase, and the one you bought keeps working.</dd>
+      </div>
+      <div>
+        <dt>What happens if I stop subscribing?</dt>
+        <dd>The plugins stop working soon after your paid time ends. Effects pass your audio through unchanged and instruments go silent, so your sessions still open, with their settings intact. Subscribe again and it all comes back.</dd>
+      </div>
+      <div>
+        <dt>What do I need to run them?</dt>
+        <dd>macOS 12 or later, on Apple Silicon or Intel, and a DAW that loads AU or VST3. Windows is coming, as VST3 on 64-bit Windows 10 and 11. There’s no AAX version, so they won’t load in Pro Tools.</dd>
+      </div>
+      <div>
+        <dt>Can I get a refund?</dt>
+        <dd>Yes. You can get a full refund within 14 days of a payment, no questions asked. Email <a href="mailto:support@makethings.audio">support@makethings.audio</a>.</dd>
+      </div>
+      <div>
+        <dt>Why does Paddle appear on my receipt?</dt>
+        <dd>Paddle handles our checkout, sales tax and receipts, so that’s the name you’ll see on your card statement.</dd>
+      </div>
+      <div>
+        <dt>Is there education licensing?</dt>
+        <dd>Yes, two ways. Teachers can give a class access through a StemShare group, which covers every student and instructor in it for as long as they’re a member. Or individual students and educators can get 50% off the yearly subscription, renewed each year with valid status. <a href="/edu/">Ask for either one here</a>.</dd>
+      </div>
+    </dl>
+    <p class="lp-contact">Questions? <a href="mailto:support@makethings.audio">support@makethings.audio</a></p>
+  </div>
+</div>
+<script src="/shared/launch.js" type="module"></script>
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -912,6 +1003,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     if (mode === 'eq' || mode === 'moving') return;
     if (push) pushRoute('/plugins/eq/');
     mode = 'moving';
+    scrollTo(0, 0); // from partway down the questions, the EQ page still starts at its top
     hydrate();
     activate(['hero', 'inst']);
     tween(1, 1250, () => {

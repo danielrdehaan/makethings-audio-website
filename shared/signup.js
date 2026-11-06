@@ -3,6 +3,7 @@
 // until sales open, and without a Turnstile site key in config.js.
 import { PLUGIN_API, TURNSTILE_SITE_KEY } from './config.js'
 import { h, sb } from './account.js'
+import { loadTurnstile } from './turnstile.js'
 
 const root = document.getElementById('app')
 // A plan chosen on /buy before there was an account: the email's link comes back to it.
@@ -29,17 +30,6 @@ function closed() {
     h('p', { class: 'fine' }, h('a', { class: 'pill', href: '/plugins/', style: 'text-decoration:none' }, 'See the plugins')),
     h('p', { class: 'fine' }, 'Already have an account? ', h('a', { href: '/login/' }, 'Sign in'), '.'),
   )
-}
-
-function loadTurnstile() {
-  return new Promise((resolve, reject) => {
-    if (window.turnstile) { resolve(window.turnstile); return }
-    const s = document.createElement('script')
-    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-    s.onload = () => resolve(window.turnstile)
-    s.onerror = reject
-    document.head.append(s)
-  })
 }
 
 function form() {
