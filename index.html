@@ -1,154 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>makethings.audio</title>
-  <meta name="description" content="Audio design by Daniel de Haan.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make Things</title>
+<meta name="description" content="Plugins, StemShare and scripts: tools for making sound.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Make Things">
+<meta property="og:description" content="Plugins, StemShare and scripts: tools for making sound.">
+<meta property="og:url" content="https://makethings.audio/">
+<link rel="canonical" href="https://makethings.audio/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@500&display=swap">
+<style>
+:root { --bg: #111416; --raise: #171b1e; --ink: #f4f3ef; --text: #c9cdd1; --muted: #9aa0a6; --line: #2c3337; --hit: #e07a6c; --accent: #7fa3d6; --ring: #4faf84; --amber: #d9a441; --f: 'Geist', -apple-system, Helvetica, Arial, sans-serif; --m: 'Geist Mono', ui-monospace, Menlo, monospace; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.5 var(--f); min-height: 100svh; display: flex; flex-direction: column; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+nav a:hover { color: var(--ink); }
+.door:hover .go, footer a:hover { text-decoration: underline; }
+.wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding-inline: 20px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 22px; }
+/* Fixed height and a shared baseline, so a change of font doesn't move the header. */
+.mark { display: flex; align-items: baseline; height: 1.12em; font: 700 clamp(22px, 2.2vw, 26px)/1.12 var(--f); letter-spacing: -.035em; color: var(--ink); white-space: nowrap; }
+nav { display: flex; gap: clamp(14px, 2.4vw, 28px); font-size: 15.5px; font-weight: 500; }
+h1 { margin: clamp(22px, 4vw, 44px) 0 clamp(26px, 3.4vw, 40px); font: 700 clamp(46px, 7.4vw, 104px)/.98 var(--f); letter-spacing: -.05em; color: var(--ink); }
+/* Every font sits in one grid cell, on the same baseline. */
+.rot { display: inline-grid; grid-template-rows: 1.12em; align-items: baseline; margin-left: .04em; transition: width .4s ease; letter-spacing: normal; }
+.rot span { grid-area: 1 / 1; line-height: 1; white-space: nowrap; transition: opacity .4s ease; }
+.rot .first { letter-spacing: -.035em; }
+.rot .waiting, .rot .out { opacity: 0; }
+.doors { display: grid; grid-template-columns: 2fr 1fr; gap: 26px; }
+.side { display: grid; gap: 22px; grid-template-rows: 1fr 1fr; }
+.door { display: flex; flex-direction: column; min-width: 0; }
+.art { flex: 1 1 0; min-height: 120px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; background: var(--raise); }
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.door h2 { margin: 12px 0 2px; font: 700 clamp(20px, 2vw, 27px)/1.15 var(--f); letter-spacing: -.03em; color: var(--ink); }
+.door p { margin: 0; font-size: 15.5px; line-height: 1.4; }
+.go { display: block; margin-top: 7px; font: 500 12.5px/1 var(--m); letter-spacing: .08em; text-transform: uppercase; color: var(--hit); }
+.art.icon { position: relative; }
+.art.icon svg { position: absolute; inset: 16% 12%; width: 76%; height: 68%; }
+.made { padding-block: clamp(64px, 9vw, 130px) clamp(24px, 4vw, 56px); }
+.made p { margin: 0; max-width: 22ch; font: 700 clamp(34px, 5.2vw, 76px)/1.02 var(--f); letter-spacing: -.045em; text-wrap: balance; }
+.made .h { color: var(--ink); }
+.made .m { color: rgba(244, 243, 239, .32); font-weight: 400; margin-top: 10px; max-width: none; }
+.made .h em { font-style: normal; color: var(--ring); }
+.made .m em { font-style: normal; font-family: var(--m); font-weight: 500; letter-spacing: -.06em; color: var(--hit); }
+footer { margin-top: auto; padding-block: 30px 24px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
+footer span { display: flex; gap: 18px; flex-wrap: wrap; }
+@media (max-width: 720px) {
+  /* The doors are right below, so the phone's header keeps only what they don't cover. */
+  nav a:not(:last-child) { display: none; }
+  .doors { grid-template-columns: 1fr; }
+  .side { grid-template-rows: none; }
+  .art { flex: none; height: 150px; }
+  .big .art { height: auto; aspect-ratio: 1000 / 575; }
+}
+</style>
 </head>
 <body>
-  <div class="page">
-    <main class="hero">
-      <div>
-        <h1>
-          <span class="wordmark">makethings.</span><span class="rotating-word" id="rotatingWord"><span class="in">audio</span></span>
-        </h1>
-        <a href="mailto:hi@makethings.audio" class="contact-link">hi@makethings.audio</a>
-      </div>
-    </main>
-    <footer class="site-footer">
-      <div class="container">
-        <p>&copy; 2025 <a href="https://makethings.studio">makethings.studio</a></p>
-      </div>
-    </footer>
-  </div>
-
-  <script>
-    const fonts = [
-      'Pacifico',
-      'Permanent Marker',
-      'Bungee',
-      'Caveat',
-      'Lobster',
-      'Righteous',
-      'Satisfy',
-      'Fredoka',
-      'Abril Fatface',
-      'Press Start 2P',
-      'Sacramento',
-      'Concert One',
-      'Silkscreen',
-      'Comfortaa',
-      'Rubik Mono One',
-      'Playfair Display',
-      'Monoton',
-      'Russo One',
-      'Indie Flower',
-      'Bangers',
-      'Bungee Shade',
-      'Rubik Burned',
-      'Rubik Vinyl',
-      'Rubik Wet Paint',
-      'Rubik Glitch',
-      'Rubik Puddles',
-      'Rubik Spray Paint',
-      'Rubik Storm',
-      'Rubik Distressed',
-      'Rubik Maze',
-      'Creepster',
-      'Fascinate',
-      'Faster One',
-      'Rammetto One',
-      'Shrikhand',
-      'Orbitron',
-      'Audiowide',
-      'Bungee Inline',
-      'Megrim',
-      'Poiret One',
-      'Wallpoet',
-      'Notable',
-      'Vast Shadow',
-      'Londrina Solid',
-      'Londrina Outline',
-      'Londrina Shadow',
-      'Honk',
-      'Bagel Fat One',
-      'Moo Lah Lah',
-      'Nabla',
-      'Tiny5',
-      'Pixelify Sans',
-      'Jersey 10',
-      'Jersey 25',
-      'Kalnia',
-      'Jacquard 12',
-      'Micro 5',
-      'Foldit',
-      'Climate Crisis',
-      'Kablammo',
-    ];
-
-    // Preload fonts in batches via Google Fonts
-    const batchSize = 15;
-    for (let i = 0; i < fonts.length; i += batchSize) {
-      const batch = fonts.slice(i, i + batchSize);
-      const params = batch.map(f => 'family=' + f.replace(/ /g, '+')).join('&');
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?' + params + '&display=swap';
-      document.head.appendChild(link);
-    }
-
-    let lastHue = -1;
-    function randomColor() {
-      let h;
-      do {
-        h = Math.floor(Math.random() * 360);
-      } while (lastHue >= 0 && Math.min(Math.abs(h - lastHue), 360 - Math.abs(h - lastHue)) < 60);
-      lastHue = h;
-      const s = 60 + Math.floor(Math.random() * 30);
-      const l = 45 + Math.floor(Math.random() * 20);
-      return 'hsl(' + h + ',' + s + '%,' + l + '%)';
-    }
-
-    const container = document.getElementById('rotatingWord');
-    let current = 0;
-
-    // Set initial width
-    const initialSpan = container.querySelector('.in');
-    container.style.width = initialSpan.offsetWidth + 'px';
-
-    async function cycle() {
-      const currentSpan = container.querySelector('.in');
-      const next = (current + 1) % fonts.length;
-      const fontFamily = fonts[next];
-
-      // Wait for font to be ready before transitioning
-      try {
-        await document.fonts.load('1em "' + fontFamily + '"');
-      } catch (e) {}
-
-      const nextSpan = document.createElement('span');
-      nextSpan.textContent = 'audio';
-      nextSpan.style.fontFamily = "'" + fontFamily + "', cursive";
-      nextSpan.style.color = randomColor();
-      nextSpan.className = 'waiting';
-      container.appendChild(nextSpan);
-
-      // Force reflow then transition
-      nextSpan.offsetHeight;
-      currentSpan.className = 'out';
-      nextSpan.className = 'in';
-      container.style.width = nextSpan.offsetWidth + 'px';
-
-      setTimeout(() => currentSpan.remove(), 400);
-      current = next;
-    }
-
-    setInterval(cycle, 2200);
-  </script>
+<div class="wrap">
+  <header>
+    <a class="mark" href="/" aria-label="makethings.audio"><span class="dot" aria-hidden="true">makethings.</span><span class="rot" id="rot" aria-hidden="true"><span class="first">audio</span></span></a>
+    <nav><a href="/plugins/">Plugins</a><a href="https://stems.makethings.audio/">StemShare</a><a href="/scripts/">Scripts</a><a href="/account/">Account</a></nav>
+  </header>
+  <h1>Tools for making sound.</h1>
+  <main class="doors">
+    <a class="door big" href="/plugins/">
+      <div class="art"><img src="/plugins/media/hero.jpg" alt="The Make Things EQ window."></div>
+      <h2>Plugins</h2>
+      <p>EQ, Dynamics, Modular and more, for your DAW.</p>
+      <span class="go">See them →</span>
+    </a>
+    <div class="side">
+      <a class="door" href="https://stems.makethings.audio/">
+        <div class="art icon"><svg viewBox="0 0 200 84" aria-hidden="true"><g fill="var(--ring)"><rect x="6" y="13" width="5" height="6" rx="2.5"/><rect x="15" y="10" width="5" height="12" rx="2.5"/><rect x="24" y="6" width="5" height="20" rx="2.5"/><rect x="33" y="9" width="5" height="14" rx="2.5"/><rect x="42" y="12" width="5" height="8" rx="2.5"/><rect x="51" y="7" width="5" height="18" rx="2.5"/><rect x="60" y="5" width="5" height="22" rx="2.5"/><rect x="69" y="10" width="5" height="12" rx="2.5"/><rect x="78" y="13" width="5" height="6" rx="2.5"/><rect x="87" y="11" width="5" height="10" rx="2.5"/><rect x="96" y="8" width="5" height="16" rx="2.5"/><rect x="105" y="5" width="5" height="22" rx="2.5"/><rect x="114" y="9" width="5" height="14" rx="2.5"/><rect x="123" y="12" width="5" height="8" rx="2.5"/><rect x="132" y="10" width="5" height="12" rx="2.5"/><rect x="141" y="6" width="5" height="20" rx="2.5"/><rect x="150" y="8" width="5" height="16" rx="2.5"/><rect x="159" y="12" width="5" height="8" rx="2.5"/><rect x="168" y="13" width="5" height="6" rx="2.5"/><rect x="177" y="10" width="5" height="12" rx="2.5"/><rect x="186" y="12" width="5" height="8" rx="2.5"/></g><g fill="var(--accent)"><rect x="6" y="37" width="5" height="10" rx="2.5"/><rect x="15" y="34" width="5" height="16" rx="2.5"/><rect x="24" y="38" width="5" height="8" rx="2.5"/><rect x="33" y="35" width="5" height="14" rx="2.5"/><rect x="42" y="31" width="5" height="22" rx="2.5"/><rect x="51" y="33" width="5" height="18" rx="2.5"/><rect x="60" y="37" width="5" height="10" rx="2.5"/><rect x="69" y="39" width="5" height="6" rx="2.5"/><rect x="78" y="35" width="5" height="14" rx="2.5"/><rect x="87" y="32" width="5" height="20" rx="2.5"/><rect x="96" y="36" width="5" height="12" rx="2.5"/><rect x="105" y="38" width="5" height="8" rx="2.5"/><rect x="114" y="33" width="5" height="18" rx="2.5"/><rect x="123" y="31" width="5" height="22" rx="2.5"/><rect x="132" y="37" width="5" height="10" rx="2.5"/><rect x="141" y="39" width="5" height="6" rx="2.5"/><rect x="150" y="35" width="5" height="14" rx="2.5"/><rect x="159" y="33" width="5" height="18" rx="2.5"/><rect x="168" y="37" width="5" height="10" rx="2.5"/><rect x="177" y="35" width="5" height="14" rx="2.5"/><rect x="186" y="39" width="5" height="6" rx="2.5"/></g><g fill="var(--amber)"><rect x="6" y="64" width="5" height="8" rx="2.5"/><rect x="15" y="65" width="5" height="6" rx="2.5"/><rect x="24" y="61" width="5" height="14" rx="2.5"/><rect x="33" y="58" width="5" height="20" rx="2.5"/><rect x="42" y="62" width="5" height="12" rx="2.5"/><rect x="51" y="57" width="5" height="22" rx="2.5"/><rect x="60" y="60" width="5" height="16" rx="2.5"/><rect x="69" y="64" width="5" height="8" rx="2.5"/><rect x="78" y="62" width="5" height="12" rx="2.5"/><rect x="87" y="65" width="5" height="6" rx="2.5"/><rect x="96" y="59" width="5" height="18" rx="2.5"/><rect x="105" y="61" width="5" height="14" rx="2.5"/><rect x="114" y="57" width="5" height="22" rx="2.5"/><rect x="123" y="63" width="5" height="10" rx="2.5"/><rect x="132" y="60" width="5" height="16" rx="2.5"/><rect x="141" y="64" width="5" height="8" rx="2.5"/><rect x="150" y="65" width="5" height="6" rx="2.5"/><rect x="159" y="62" width="5" height="12" rx="2.5"/><rect x="168" y="59" width="5" height="18" rx="2.5"/><rect x="177" y="64" width="5" height="8" rx="2.5"/><rect x="186" y="63" width="5" height="10" rx="2.5"/></g><path d="M128 8h44a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10h-28l-12 12v-12h-4a10 10 0 0 1-10-10V18a10 10 0 0 1 10-10z" fill="var(--ink)" stroke="var(--raise)" stroke-width="5" paint-order="stroke"/><g fill="var(--raise)"><circle cx="136" cy="29" r="4"/><circle cx="150" cy="29" r="4"/><circle cx="164" cy="29" r="4"/></g></svg></div>
+        <h2>StemShare</h2>
+        <p>Learn, share your stems and get feedback.</p>
+        <span class="go">Open it →</span>
+      </a>
+      <a class="door" href="/scripts/">
+        <div class="art icon"><svg viewBox="0 0 200 84" aria-hidden="true"><g fill="none" stroke="var(--amber)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C46 6 43 11 43 19v12c0 7-4 11-11 11 7 0 11 4 11 11v12c0 8 3 13 13 13"/><path d="M144 6c10 0 13 5 13 13v12c0 7 4 11 11 11-7 0-11 4-11 11v12c0 8-3 13-13 13"/></g><g fill="var(--hit)"><rect x="69" y="34" width="5.5" height="16" rx="2.75"/><rect x="78.5" y="25" width="5.5" height="34" rx="2.75"/><rect x="88" y="15" width="5.5" height="54" rx="2.75"/><rect x="97.5" y="8" width="5.5" height="68" rx="2.75"/><rect x="107" y="19" width="5.5" height="46" rx="2.75"/><rect x="116.5" y="28" width="5.5" height="28" rx="2.75"/><rect x="126" y="35" width="5.5" height="14" rx="2.75"/></g></svg></div>
+        <h2>Scripts</h2>
+        <p>Workflow tools for REAPER, Unity and FMOD.</p>
+        <span class="go">Browse →</span>
+      </a>
+    </div>
+  </main>
+  <section class="made" aria-label="How Make Things tools are made">
+    <p class="h">Conceived, designed, and perfected by <em>humans.</em></p>
+    <p class="m">Coded and optimized by <em>machines.</em></p>
+  </section>
+</div>
+<footer><div class="wrap"><span>© 2026 Make Things</span><span><a href="mailto:support@makethings.audio">support@makethings.audio</a></span></div></footer>
+<script>
+// One font at a time, and only the five letters it has to draw. Each is fetched before its turn, so a slow one never leaves a gap.
+const fonts = ['Pacifico', 'Permanent Marker', 'Bungee', 'Caveat', 'Lobster', 'Righteous', 'Satisfy', 'Fredoka', 'Abril Fatface', 'Press Start 2P', 'Sacramento', 'Concert One', 'Silkscreen', 'Comfortaa', 'Rubik Mono One', 'Playfair Display', 'Monoton', 'Russo One', 'Indie Flower', 'Bangers', 'Bungee Shade', 'Rubik Burned', 'Rubik Vinyl', 'Rubik Wet Paint', 'Rubik Glitch', 'Rubik Puddles', 'Rubik Spray Paint', 'Rubik Storm', 'Rubik Distressed', 'Rubik Maze', 'Creepster', 'Fascinate', 'Faster One', 'Rammetto One', 'Shrikhand', 'Orbitron', 'Audiowide', 'Bungee Inline', 'Megrim', 'Poiret One', 'Wallpoet', 'Notable', 'Vast Shadow', 'Londrina Solid', 'Londrina Outline', 'Londrina Shadow', 'Honk', 'Bagel Fat One', 'Moo Lah Lah', 'Nabla', 'Tiny5', 'Pixelify Sans', 'Jersey 10', 'Jersey 25', 'Kalnia', 'Jacquard 12', 'Micro 5', 'Foldit', 'Climate Crisis', 'Kablammo'];
+const rot = document.getElementById('rot');
+const fetched = new Map();
+function fetchFont(name) {
+  if (!fetched.has(name)) fetched.set(name, new Promise((done) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + name.replace(/ /g, '+') + '&text=audio&display=block';
+    link.onload = () => document.fonts.load('1em "' + name + '"', 'audio').then((faces) => done(faces.length > 0), () => done(false));
+    link.onerror = () => done(false);
+    document.head.appendChild(link);
+    setTimeout(() => done(false), 4000);
+  }));
+  return fetched.get(name);
+}
+let lastHue = -1;
+// Light enough to read on the dark page, and never close to the colour before.
+function nextColor() {
+  let h;
+  do { h = Math.floor(Math.random() * 360); } while (lastHue >= 0 && Math.min(Math.abs(h - lastHue), 360 - Math.abs(h - lastHue)) < 60);
+  lastHue = h;
+  return 'hsl(' + h + ',' + (65 + Math.floor(Math.random() * 25)) + '%,' + (62 + Math.floor(Math.random() * 12)) + '%)';
+}
+let at = -1, busy = false;
+async function cycle() {
+  if (busy || document.hidden) return;
+  busy = true;
+  try {
+    // A font that doesn't arrive is skipped.
+    let next = at, ok = false;
+    for (let tries = 0; tries < 5 && !ok; tries++) { next = (next + 1) % fonts.length; ok = await fetchFont(fonts[next]); }
+    if (!ok) return;
+    const current = rot.querySelector('span:not(.out)');
+    rot.style.width = current.getBoundingClientRect().width + 'px';
+    const span = document.createElement('span');
+    span.textContent = 'audio';
+    span.style.fontFamily = "'" + fonts[next] + "', cursive";
+    span.style.color = nextColor();
+    span.className = 'waiting';
+    rot.appendChild(span);
+    // The widest fonts shrink to the room left before the links.
+    const room = document.querySelector('nav').getBoundingClientRect().left - 20 - rot.getBoundingClientRect().left;
+    const wide = span.getBoundingClientRect().width;
+    if (wide > room) span.style.fontSize = (room / wide) + 'em';
+    const width = span.getBoundingClientRect().width;
+    rot.offsetHeight;
+    current.className = 'out';
+    span.className = '';
+    rot.style.width = width + 'px';
+    setTimeout(() => current.remove(), 400);
+    at = next;
+    fetchFont(fonts[(at + 1) % fonts.length]);
+  } finally { busy = false; }
+}
+const timer = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : (fetchFont(fonts[0]), setInterval(cycle, 2200));
+</script>
 </body>
 </html>
