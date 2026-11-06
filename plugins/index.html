@@ -386,14 +386,22 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-faq { display: none; }
 html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; transition: opacity .25s ease; }
 html.list .lp-faq.in-flight { opacity: 0; pointer-events: none; }
-.lp-faq .made { padding-block: clamp(64px, 9vw, 130px) clamp(72px, 10vw, 150px); }
+.lp-faq .made { padding-block: clamp(64px, 9vw, 130px) 0; text-align: left; }
+.lp-faq .made p { margin-inline: 0; }
 .lp-faq h2 { font: 700 clamp(30px, 3.6vw, 48px)/1.05 var(--f-display); letter-spacing: -0.035em; color: var(--ink); margin: 0 0 clamp(24px, 3vw, 40px); }
-.lp-faq dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: clamp(26px, 3.5vw, 44px) clamp(32px, 5vw, 72px); }
-.lp-faq dt { font: 600 clamp(18px, 1.7vw, 22px)/1.25 var(--f-display); letter-spacing: -0.02em; color: var(--ink); }
+.lp-qs { max-width: 860px; border-top: 1px solid var(--line); }
+.lp-qs details { border-bottom: 1px solid var(--line); }
+.lp-qs summary { position: relative; padding: clamp(16px, 1.7vw, 22px) 44px clamp(16px, 1.7vw, 22px) 0; font: 600 clamp(18px, 1.7vw, 22px)/1.25 var(--f-display); letter-spacing: -0.02em; color: var(--ink); cursor: pointer; list-style: none; }
+.lp-qs summary::-webkit-details-marker { display: none; }
+.lp-qs summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.lp-qs summary::before, .lp-qs summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 16px; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--muted); }
+.lp-qs summary::after { transform: rotate(90deg); }
+.lp-qs details[open] summary::after { display: none; }
+.lp-qs summary:hover::before, .lp-qs summary:hover::after { background: var(--ink); }
 .lp-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: clamp(20px, 2.4vw, 28px) clamp(16px, 2vw, 28px); }
 .lp-more .lp-art { flex: none; height: clamp(96px, 12vw, 170px); }
 .lp-faq .lp-more h2 { font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--f-display); letter-spacing: -0.025em; margin: 0; }
-.notify { padding-block: clamp(56px, 7vw, 88px) 0; scroll-margin-top: 12px; }
+.notify { padding-block: clamp(64px, 9vw, 130px) clamp(72px, 10vw, 150px); scroll-margin-top: 12px; }
 .notify > p { margin: 0; max-width: 56ch; font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); }
 .notify form { display: grid; gap: 14px; margin-top: 22px; max-width: 420px; }
 .notify form[hidden], .notify [hidden] { display: none; }
@@ -407,7 +415,7 @@ html.list .lp-faq.in-flight { opacity: 0; pointer-events: none; }
 .notify .notify-done { margin-top: 22px; color: var(--ring); }
 .notify-link { margin: 26px 0 0; text-align: center; font-size: clamp(15.5px, 1.3vw, 17px); }
 .lp-contact { margin: clamp(34px, 4vw, 52px) 0 0; font-size: clamp(15.5px, 1.3vw, 17px); color: var(--text); }
-.lp-faq dd { margin: 10px 0 0; font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); max-width: 62ch; }
+.lp-qs details p { margin: 0; padding-bottom: clamp(18px, 2vw, 26px); font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); max-width: 62ch; }
 html.still.list .lp-faq { display: block; }
 /* While the list shows, the EQ page's name and pricing wait for it. */
 html.list .mark span, html.list .mark-in .pill { opacity: 0; pointer-events: none; }
@@ -493,13 +501,13 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
           <div class="lp-ph">
             <div class="lp-art g-dynamics"></div>
             <h2>Dynamics</h2>
-            <p>Compression and gating, a partner for the EQ.</p>
+            <p>The compressor that gates too, and shows every move.</p>
             <em>Coming</em>
           </div>
           <div class="lp-ph">
             <div class="lp-art g-modular"><span class="lp-beta small">Beta Testing</span></div>
             <h2>Modular</h2>
-            <p>The whole rack as an instrument, an audio effect or a MIDI effect.</p>
+            <p>The modular rack that fits any slot, and plays anything.</p>
           </div>
         </div>
       </div>
@@ -741,22 +749,26 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       <div class="lp-ph">
         <div class="lp-art g-sampler"></div>
         <h2>Sampler</h2>
-        <p>A sampling and granular instrument.</p>
+        <p>The sampler that goes granular, and makes anything playable.</p>
         <em>Coming</em>
       </div>
       <div class="lp-ph">
         <div class="lp-art g-hybrid-reverb"></div>
         <h2>Hybrid Reverb</h2>
-        <p>Algorithmic and convolution reverb, together.</p>
+        <p>The reverb that blends real rooms with impossible ones.</p>
         <em>Coming</em>
       </div>
       <div class="lp-ph">
         <div class="lp-art g-capture"></div>
         <h2>Capture</h2>
-        <p>Turn a plugin or Modular patch into a sampled instrument.</p>
+        <p>The auto-sampler that turns any plugin into an instrument.</p>
         <em>Coming</em>
       </div>
     </div>
+    <section class="made" aria-label="How Make Things plugins are made">
+      <p class="h">Conceived, designed, and perfected by <em>humans.</em></p>
+      <p class="m">Coded and optimized by <em>machines.</em></p>
+    </section>
     <section class="notify" id="notify" aria-labelledby="h-notify">
       <h2 id="h-notify">Hear when they’re on sale</h2>
       <p>They’re in beta with current students and StemShare moderators for now. Leave your email and we’ll tell you when they’re ready.</p>
@@ -768,57 +780,53 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       </form>
       <p id="notifyMail" style="margin-top:22px">Email <a href="mailto:support@makethings.audio">support@makethings.audio</a> and we’ll tell you.</p>
     </section>
-    <section class="made" aria-label="How Make Things plugins are made">
-      <p class="h">Conceived, designed, and perfected by <em>humans.</em></p>
-      <p class="m">Coded and optimized by <em>machines.</em></p>
-    </section>
     <h2 id="h-faq">FAQ</h2>
-    <dl>
-      <div>
-        <dt>Can I buy them yet?</dt>
-        <dd>Not yet. They’re in beta with current students and StemShare moderators. <a href="#notify">Leave your email</a> and we’ll tell you when they’re on sale.</dd>
-      </div>
-      <div>
-        <dt>Was AI used to make these plugins?</dt>
-        <dd>Yes. The code in Make Things plugins is written by AI coding agents. The exceptions are the open-source libraries they build on, like JUCE. We’d rather you hear that from us.</dd>
-      </div>
-      <div>
-        <dt>Is there AI inside the plugins?</dt>
-        <dd>Nope. Just local DSP running on your machine.</dd>
-      </div>
-      <div>
-        <dt>Can I try them first?</dt>
-        <dd>Yes. You get 14 days free, with full sound and no card. The trial starts the first time you sign in from a plugin, and each person and each computer gets one.</dd>
-      </div>
-      <div>
-        <dt>How does licensing work?</dt>
-        <dd>Sign in once on each computer, up to 3, and every Make Things plugin works there. They renew your licence online about once a week, and keep working offline for up to 30 days.</dd>
-      </div>
-      <div>
-        <dt>What do I get if I buy one outright?</dt>
-        <dd>That plugin, with every update to its major version: EQ 1 gets every 1.x update. A future major version would be a separate purchase, and the one you bought keeps working.</dd>
-      </div>
-      <div>
-        <dt>What happens if I stop subscribing?</dt>
-        <dd>The plugins stop working soon after your paid time ends. Effects pass your audio through unchanged and instruments go silent, so your sessions still open, with their settings intact. Subscribe again and it all comes back.</dd>
-      </div>
-      <div>
-        <dt>What do I need to run them?</dt>
-        <dd>macOS 12 or later, on Apple Silicon or Intel, and a DAW that loads AU or VST3. Windows is coming, as VST3 on 64-bit Windows 10 and 11. There’s no AAX version, so they won’t load in Pro Tools.</dd>
-      </div>
-      <div>
-        <dt>Can I get a refund?</dt>
-        <dd>Yes. You can get a full refund within 14 days of a payment, no questions asked. Email <a href="mailto:support@makethings.audio">support@makethings.audio</a>.</dd>
-      </div>
-      <div>
-        <dt>Why does Paddle appear on my receipt?</dt>
-        <dd>Paddle handles our checkout, sales tax and receipts, so that’s the name you’ll see on your card statement.</dd>
-      </div>
-      <div>
-        <dt>Is there education licensing?</dt>
-        <dd>Yes, two ways. Teachers can give a class access through a StemShare Group, which covers every student and instructor in it for as long as they’re a member. Or individual students and educators can get 50% off the yearly subscription, renewed each year with valid status. <a href="/edu/">Ask for either one here</a>.</dd>
-      </div>
-    </dl>
+    <div class="lp-qs">
+      <details>
+        <summary>Can I buy them yet?</summary>
+        <p>Not yet. They’re in beta with current students and StemShare moderators. <a href="#notify">Leave your email</a> and we’ll tell you when they’re on sale.</p>
+      </details>
+      <details>
+        <summary>Was AI used to make these plugins?</summary>
+        <p>Yes. The code in Make Things plugins is written by AI coding agents. The exceptions are the open-source libraries they build on, like JUCE. We’d rather you hear that from us.</p>
+      </details>
+      <details>
+        <summary>Is there AI inside the plugins?</summary>
+        <p>Nope. Just local DSP running on your machine.</p>
+      </details>
+      <details>
+        <summary>Can I try them first?</summary>
+        <p>Yes. You get 14 days free, with full sound and no card. The trial starts the first time you sign in from a plugin, and each person and each computer gets one.</p>
+      </details>
+      <details>
+        <summary>How does licensing work?</summary>
+        <p>Sign in once on each computer, up to 3, and every Make Things plugin works there. They renew your licence online about once a week, and keep working offline for up to 30 days.</p>
+      </details>
+      <details>
+        <summary>What do I get if I buy one outright?</summary>
+        <p>That plugin, with every update to its major version: EQ 1 gets every 1.x update. A future major version would be a separate purchase, and the one you bought keeps working.</p>
+      </details>
+      <details>
+        <summary>What happens if I stop subscribing?</summary>
+        <p>The plugins stop working soon after your paid time ends. Effects pass your audio through unchanged and instruments go silent, so your sessions still open, with their settings intact. Subscribe again and it all comes back.</p>
+      </details>
+      <details>
+        <summary>What do I need to run them?</summary>
+        <p>macOS 12 or later, on Apple Silicon or Intel, and a DAW that loads AU or VST3. Windows is coming, as VST3 on 64-bit Windows 10 and 11. There’s no AAX version, so they won’t load in Pro Tools.</p>
+      </details>
+      <details>
+        <summary>Can I get a refund?</summary>
+        <p>Yes. You can get a full refund within 14 days of a payment, no questions asked. Email <a href="mailto:support@makethings.audio">support@makethings.audio</a>.</p>
+      </details>
+      <details>
+        <summary>Why does Paddle appear on my receipt?</summary>
+        <p>Paddle handles our checkout, sales tax and receipts, so that’s the name you’ll see on your card statement.</p>
+      </details>
+      <details>
+        <summary>Is there education licensing?</summary>
+        <p>Yes, two ways. Teachers can give a class access through a StemShare Group, which covers every student and instructor in it for as long as they’re a member. Or individual students and educators can get 50% off the yearly subscription, renewed each year with valid status. <a href="/edu/">Ask for either one here</a>.</p>
+      </details>
+    </div>
     <p class="lp-contact">Questions? <a href="mailto:support@makethings.audio">support@makethings.audio</a></p>
   </div>
 </div>
