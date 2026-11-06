@@ -353,7 +353,7 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-head p { margin: 10px 0 0; font-size: clamp(15px, 1.35vw, 18px); color: var(--muted); }
 .lp-row { display: flex; gap: clamp(16px, 2vw, 28px); align-items: stretch; min-height: 0; }
 .lp-eq { display: block; flex: 0 0 min(68%, calc((100svh - 300px) * 1.739)); color: inherit; text-decoration: none; }
-.lp-slot { aspect-ratio: 1000 / 575; border-radius: 6px; }
+.lp-slot { position: relative; aspect-ratio: 1000 / 575; border-radius: 6px; }
 .lp-slot img { display: none; }
 .lp-cap { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; padding-top: 14px; will-change: opacity; }
 .lp-cap h2, .lp-ph h2 { font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--f-display); letter-spacing: -0.025em; color: var(--ink); margin: 0; }
@@ -363,9 +363,16 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-eq:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 8px; }
 .lp-side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: clamp(14px, 2vh, 22px); will-change: transform, opacity; }
 .lp-ph { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-.lp-art { flex: 1 1 0; min-height: 44px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); margin-bottom: 10px; overflow: hidden; background: var(--raise); }
-/* Made-up screens, blurred, until each device has a real one. */
-.lp-art img { display: block; width: 100%; height: 100%; object-fit: cover; filter: blur(3px); transform: scale(1.06); opacity: .85; }
+.lp-art { position: relative; flex: 1 1 0; min-height: 44px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); margin-bottom: 10px; overflow: hidden; }
+/* A colour for each device until it has a real picture. */
+.g-dynamics { background: radial-gradient(120% 150% at 12% 15%, rgba(224, 122, 108, .75), transparent 62%), radial-gradient(120% 150% at 90% 90%, rgba(217, 164, 65, .6), transparent 66%), var(--raise); }
+.g-modular { background: radial-gradient(120% 150% at 12% 15%, rgba(79, 175, 132, .75), transparent 62%), radial-gradient(120% 150% at 90% 90%, rgba(127, 163, 214, .65), transparent 66%), var(--raise); }
+.g-sampler { background: radial-gradient(120% 150% at 12% 15%, rgba(127, 163, 214, .8), transparent 62%), radial-gradient(120% 150% at 90% 90%, rgba(165, 143, 214, .65), transparent 66%), var(--raise); }
+.g-hybrid-reverb { background: radial-gradient(120% 150% at 12% 15%, rgba(165, 143, 214, .8), transparent 62%), radial-gradient(120% 150% at 90% 90%, rgba(224, 122, 108, .6), transparent 66%), var(--raise); }
+.g-capture { background: radial-gradient(120% 150% at 12% 15%, rgba(217, 164, 65, .7), transparent 62%), radial-gradient(120% 150% at 90% 90%, rgba(79, 175, 132, .65), transparent 66%), var(--raise); }
+/* The pricing section's sticker, smaller. */
+.lp-beta { position: absolute; left: 50%; top: 50%; padding: .32em .72em .36em; border-radius: .28em; background: #ffd23f; color: #111416; font: 800 clamp(20px, 3.4vw, 46px)/1 var(--f-display); letter-spacing: -0.03em; white-space: nowrap; transform: translate(-50%, -50%) rotate(-5deg); box-shadow: 0 0 0 .09em #f4f3ef, 0 .3em .9em rgba(0, 0, 0, .55); pointer-events: none; }
+.lp-beta.small { font-size: clamp(14px, 1.7vw, 24px); }
 .lp-ph p { margin: 4px 0 0; font-size: 14px; line-height: 1.35; color: var(--text); }
 .lp-ph em { display: block; margin-top: 6px; font: 500 11px var(--f-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .stage.tall .lp { padding-top: 66px; }
@@ -475,7 +482,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       </div>
       <div class="lp-row">
         <a class="lp-eq" id="lpEq" href="/plugins/eq/">
-          <div class="lp-slot" id="lpSlot"><img src="/plugins/media/hero.jpg" alt="The Make Things EQ window." loading="lazy"></div>
+          <div class="lp-slot" id="lpSlot"><img src="/plugins/media/hero.jpg" alt="The Make Things EQ window." loading="lazy"><span class="lp-beta" id="lpBeta">Beta Testing</span></div>
           <div class="lp-cap" id="lpCap">
             <h2>EQ</h2>
             <p>The EQ that does it all, and makes it feel simple.</p>
@@ -484,16 +491,15 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
         </a>
         <div class="lp-side" id="lpSide">
           <div class="lp-ph">
-            <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-dynamics.svg" alt="" loading="lazy" decoding="async"></div>
+            <div class="lp-art g-dynamics"></div>
             <h2>Dynamics</h2>
             <p>Compression and gating, a partner for the EQ.</p>
             <em>Coming</em>
           </div>
           <div class="lp-ph">
-            <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-modular.svg" alt="" loading="lazy" decoding="async"></div>
+            <div class="lp-art g-modular"><span class="lp-beta small">Beta Testing</span></div>
             <h2>Modular</h2>
             <p>The whole rack as an instrument, an audio effect or a MIDI effect.</p>
-            <em>Coming</em>
           </div>
         </div>
       </div>
@@ -733,19 +739,19 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
   <div class="wrap">
     <div class="lp-more">
       <div class="lp-ph">
-        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-sampler.svg" alt="" loading="lazy" decoding="async"></div>
+        <div class="lp-art g-sampler"></div>
         <h2>Sampler</h2>
         <p>A sampling and granular instrument.</p>
         <em>Coming</em>
       </div>
       <div class="lp-ph">
-        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-hybrid-reverb.svg" alt="" loading="lazy" decoding="async"></div>
+        <div class="lp-art g-hybrid-reverb"></div>
         <h2>Hybrid Reverb</h2>
         <p>Algorithmic and convolution reverb, together.</p>
         <em>Coming</em>
       </div>
       <div class="lp-ph">
-        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-capture.svg" alt="" loading="lazy" decoding="async"></div>
+        <div class="lp-art g-capture"></div>
         <h2>Capture</h2>
         <p>Turn a plugin or Modular patch into a sampled instrument.</p>
         <em>Coming</em>
@@ -852,7 +858,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
   const links = [...bar.querySelectorAll('a')];
   const html = document.documentElement;
   const lp = document.getElementById('lp'), lpEq = document.getElementById('lpEq'), lpSlot = document.getElementById('lpSlot');
-  const lpHead = document.getElementById('lpHead'), lpCap = document.getElementById('lpCap'), lpSide = document.getElementById('lpSide');
+  const lpHead = document.getElementById('lpHead'), lpCap = document.getElementById('lpCap'), lpSide = document.getElementById('lpSide'), lpBeta = document.getElementById('lpBeta');
   const markTag = document.querySelector('.mark span'), markPill = document.querySelector('.mark-in .pill');
   const backLinks = [...document.querySelectorAll('.mark, .foot a')];
   // /plugins/eq/ is the EQ page and any other address the list; the page's own anchors only change the hash.
@@ -1018,7 +1024,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     markIn.style.opacity = '1.000'; markIn.style.pointerEvents = 'auto';
     const away = smooth(x / .4), tag = smooth((x - .6) / .4);
     lpHead.style.opacity = (1 - away).toFixed(3); lpHead.style.transform = 'translate3d(0,' + (-34 * x).toFixed(1) + 'px,0)';
-    lpCap.style.opacity = (1 - smooth(x / .25)).toFixed(3);
+    lpCap.style.opacity = lpBeta.style.opacity = (1 - smooth(x / .25)).toFixed(3);
     lpSide.style.opacity = (1 - away).toFixed(3); lpSide.style.transform = wide ? 'translate3d(' + (80 * x).toFixed(1) + 'px,0,0)' : 'translate3d(0,' + (80 * x).toFixed(1) + 'px,0)';
     lp.inert = x > .5; lp.style.visibility = x >= 1 ? 'hidden' : 'visible';
     markTag.style.opacity = tag.toFixed(3); markPill.style.opacity = tag.toFixed(3); markPill.style.pointerEvents = tag > .5 ? 'auto' : 'none';
