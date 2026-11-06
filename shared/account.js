@@ -7,10 +7,35 @@ export const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, 
   auth: { detectSessionInUrl: false },
 })
 
-/** The session, or on to /login with this page as where to come back to (hash included: a plugin opens /downloads#eq). */
+/** Whether the Worker refuses a session without a second factor (its REQUIRE_MFA). If this can't be answered it's no: anyone with a
+ *  factor is still asked for their code, and a refused call goes back to /login. */
+export async function twoFactorRequired() {
+  try {
+    const r = await fetch(`${PLUGIN_API}/sales-status`)
+    return r.ok && (await r.json()).mfaRequired === true
+  } catch {
+    return false
+  }
+}
+
+/** What this session still owes before it can use the account: 'code' (it has a factor and hasn't used it), 'enroll' (it has none and
+ *  one is required), or null. */
+export async function twoFactorStep() {
+  try {
+    const { data, error } = await sb.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (error || data.currentLevel === 'aal2') return null
+    if (data.nextLevel === 'aal2') return 'code'
+  } catch {
+    return null
+  }
+  return (await twoFactorRequired()) ? 'enroll' : null
+}
+
+/** The session, or on to /login with this page as where to come back to (hash included: a plugin opens /downloads#eq). The sign-in
+ *  page also takes a session that still owes a code. */
 export async function requireSession() {
   const { data } = await sb.auth.getSession()
-  if (data.session) return data.session
+  if (data.session && !(await twoFactorStep())) return data.session
   toLogin()
   return new Promise(() => {}) // the page is leaving: nothing after this should run
 }

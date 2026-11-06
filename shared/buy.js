@@ -2,7 +2,7 @@
 // are open and shared/config.js has a client-side token. Buying needs an account, because the checkout carries its id: the webhook
 // (POST /api/plugin/webhook) reads it to know who bought what. /signup and /login come back here with ?plan=.
 import { PADDLE_ENV, PADDLE_JS, PADDLE_TOKEN, PLANS, PLUGIN_API } from './config.js'
-import { h, pluginApi, sb } from './account.js'
+import { h, pluginApi, sb, toLogin, twoFactorStep } from './account.js'
 
 const root = document.getElementById('app')
 const plans = PLANS.filter((p) => p.priceId)
@@ -64,6 +64,8 @@ async function open() {
   }
   const { data } = await sb.auth.getSession()
   const session = data.session
+  // Someone signed in who still owes a code: past sign-in first, so they come back here finished.
+  if (session && await twoFactorStep()) { toLogin(); return }
   // Someone signed in: who's buying, and whether they already subscribe.
   let customerId = null, subscribed = false
   if (session) {
@@ -100,8 +102,8 @@ async function open() {
   }
   const of = (kind) => plans.filter((p) => p.kind === kind)
   root.replaceChildren(
-    of('subscription').length > 0 && h('section', { class: 'sect' }, h('h2', {}, 'Every plugin'), h('ul', { class: 'plans' }, of('subscription').map(card))),
-    of('purchase').length > 0 && h('section', { class: 'sect' }, h('h2', {}, 'One plugin, to keep'), h('ul', { class: 'plans' }, of('purchase').map(card))),
+    ...(of('subscription').length > 0 ? [h('section', { class: 'sect' }, h('h2', {}, 'Every plugin'), h('ul', { class: 'plans' }, of('subscription').map(card)))] : []),
+    ...(of('purchase').length > 0 ? [h('section', { class: 'sect' }, h('h2', {}, 'One plugin, to keep'), h('ul', { class: 'plans' }, of('purchase').map(card)))] : []),
     h('section', { class: 'sect' }, h('p', { class: 'msg muted small' }, 'Try first: a 14-day trial comes with a new account, with no card needed. Payments are handled by Paddle, our merchant of record, which takes care of tax and receipts.',
       !session && [' Already have an account? ', h('a', { href: `/login/?next=${encodeURIComponent(`/buy/${location.search}`)}` }, 'Sign in'), '.'])),
   )
