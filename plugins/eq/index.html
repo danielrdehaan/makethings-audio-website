@@ -363,7 +363,9 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-eq:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 8px; }
 .lp-side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: clamp(14px, 2vh, 22px); will-change: transform, opacity; }
 .lp-ph { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-.lp-art { flex: 1 1 0; min-height: 44px; border-radius: 6px; border: 1.5px dashed var(--edge); opacity: .7; margin-bottom: 10px; }
+.lp-art { flex: 1 1 0; min-height: 44px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); margin-bottom: 10px; overflow: hidden; background: var(--raise); }
+/* Made-up screens, blurred, until each device has a real one. */
+.lp-art img { display: block; width: 100%; height: 100%; object-fit: cover; filter: blur(3px); transform: scale(1.06); opacity: .85; }
 .lp-ph p { margin: 4px 0 0; font-size: 14px; line-height: 1.35; color: var(--text); }
 .lp-ph em { display: block; margin-top: 6px; font: 500 11px var(--f-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .stage.tall .lp { padding-top: 66px; }
@@ -371,15 +373,20 @@ html.list .lp { display: flex; visibility: visible; }
 .stage.tall .lp-eq { flex: none; width: 100%; }
 .stage.tall .lp-side { flex: none; flex-direction: row; }
 .stage.tall .lp-ph { flex: 1 1 0; }
+.stage.tall .lp-art { flex: none; height: clamp(64px, 11vh, 150px); }
 @media (max-height: 760px) { .stage.tall .lp-art { display: none; } .stage.tall .lp-head h1 { font-size: 30px; } .stage.tall .lp-head p { margin-top: 4px; } }
 /* The list's own close: the EQ page's statement, then the questions about it. Part of the list, not the EQ page. */
 .lp-faq { display: none; }
-html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; }
+html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; transition: opacity .25s ease; }
+html.list .lp-faq.in-flight { opacity: 0; pointer-events: none; }
 .lp-faq .made { padding-block: clamp(64px, 9vw, 130px) clamp(72px, 10vw, 150px); }
 .lp-faq h2 { font: 700 clamp(30px, 3.6vw, 48px)/1.05 var(--f-display); letter-spacing: -0.035em; color: var(--ink); margin: 0 0 clamp(24px, 3vw, 40px); }
 .lp-faq dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: clamp(26px, 3.5vw, 44px) clamp(32px, 5vw, 72px); }
 .lp-faq dt { font: 600 clamp(18px, 1.7vw, 22px)/1.25 var(--f-display); letter-spacing: -0.02em; color: var(--ink); }
-.notify { padding-block: clamp(8px, 2vw, 24px) 0; scroll-margin-top: 12px; }
+.lp-more { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: clamp(20px, 2.4vw, 28px) clamp(16px, 2vw, 28px); }
+.lp-more .lp-art { flex: none; height: clamp(96px, 12vw, 170px); }
+.lp-faq .lp-more h2 { font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--f-display); letter-spacing: -0.025em; margin: 0; }
+.notify { padding-block: clamp(56px, 7vw, 88px) 0; scroll-margin-top: 12px; }
 .notify > p { margin: 0; max-width: 56ch; font-size: clamp(15.5px, 1.3vw, 17px); line-height: 1.55; color: var(--text); }
 .notify form { display: grid; gap: 14px; margin-top: 22px; max-width: 420px; }
 .notify form[hidden], .notify [hidden] { display: none; }
@@ -470,21 +477,21 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
         <a class="lp-eq" id="lpEq" href="/plugins/eq/">
           <div class="lp-slot" id="lpSlot"><img src="/plugins/media/hero.jpg" alt="The Make Things EQ window." loading="lazy"></div>
           <div class="lp-cap" id="lpCap">
-            <h2>Make Things EQ</h2>
+            <h2>EQ</h2>
             <p>The EQ that does it all, and makes it feel simple.</p>
             <span class="lp-go" aria-hidden="true">See it →</span>
           </div>
         </a>
         <div class="lp-side" id="lpSide">
           <div class="lp-ph">
-            <div class="lp-art" aria-hidden="true"></div>
-            <h2>Make Things Dynamics</h2>
+            <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-dynamics.svg" alt="" loading="lazy" decoding="async"></div>
+            <h2>Dynamics</h2>
             <p>Compression and gating, a partner for the EQ.</p>
             <em>Coming</em>
           </div>
           <div class="lp-ph">
-            <div class="lp-art" aria-hidden="true"></div>
-            <h2>Make Things Modular</h2>
+            <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-modular.svg" alt="" loading="lazy" decoding="async"></div>
+            <h2>Modular</h2>
             <p>The whole rack as an instrument, an audio effect or a MIDI effect.</p>
             <em>Coming</em>
           </div>
@@ -724,6 +731,26 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
 </div>
 <div class="lp-faq" id="faq">
   <div class="wrap">
+    <div class="lp-more">
+      <div class="lp-ph">
+        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-sampler.svg" alt="" loading="lazy" decoding="async"></div>
+        <h2>Sampler</h2>
+        <p>A sampling and granular instrument.</p>
+        <em>Coming</em>
+      </div>
+      <div class="lp-ph">
+        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-hybrid-reverb.svg" alt="" loading="lazy" decoding="async"></div>
+        <h2>Hybrid Reverb</h2>
+        <p>Algorithmic and convolution reverb, together.</p>
+        <em>Coming</em>
+      </div>
+      <div class="lp-ph">
+        <div class="lp-art" aria-hidden="true"><img src="/plugins/media/preview-capture.svg" alt="" loading="lazy" decoding="async"></div>
+        <h2>Capture</h2>
+        <p>Turn a plugin or Modular patch into a sampled instrument.</p>
+        <em>Coming</em>
+      </div>
+    </div>
     <section class="notify" id="notify" aria-labelledby="h-notify">
       <h2 id="h-notify">Hear when they’re on sale</h2>
       <p>They’re in beta with current students and StemShare moderators for now. Leave your email and we’ll tell you when they’re ready.</p>
@@ -882,6 +909,16 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       listCam = { cx: W0 / 2, cy: 575 / 2, sx: r.left - st.left + r.width / 2, sy: r.top - st.top + r.height / 2, lz: Math.log(r.width / W0), rot: 0 };
     }
   }
+  // The stage stays a full screen for the flight to the EQ page, so the row rarely fills it. What follows comes up over the part it doesn't
+  // use, and keeps out of the way (.in-flight) while the window flies through that part.
+  const faq = document.getElementById('faq'), lpRow = lp.querySelector('.lp-row');
+  function fitLanding() {
+    if (!html.classList.contains('list') || html.classList.contains('still')) { faq.style.marginTop = ''; return; }
+    const spare = stage.getBoundingClientRect().bottom - lpRow.getBoundingClientRect().bottom;
+    faq.style.marginTop = -Math.max(0, Math.round(spare) - 28) + 'px';
+  }
+  new ResizeObserver(fitLanding).observe(lpRow);
+  document.fonts?.ready.then(fitLanding);
   const scrollTopOf = () => scroller.getBoundingClientRect().top + scrollY;
   const beatAt = (id) => BEATS.findIndex((b) => b.id === id);
   links.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const i = beatAt(a.dataset.go); scrollTo({ top: scrollTopOf() + starts[i] * step, behavior: 'auto' }); }));
@@ -1003,6 +1040,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     if (mode === 'eq' || mode === 'moving') return;
     if (push) pushRoute('/plugins/eq/');
     mode = 'moving';
+    faq.classList.add('in-flight');
     scrollTo(0, 0); // from partway down the questions, the EQ page still starts at its top
     hydrate();
     activate(['hero', 'inst']);
@@ -1010,6 +1048,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       mode = 'eq';
       html.classList.remove('list');
       layout();
+      faq.classList.remove('in-flight');
       markTag.style.opacity = ''; markPill.style.opacity = ''; markPill.style.pointerEvents = '';
       lp.style.visibility = '';
       last = -1; pos = 0; render(0);
@@ -1026,10 +1065,12 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     html.classList.add('list');
     scrollTo(0, 0);
     layout();
+    fitLanding();
     setTitle(true);
     if (!atTop) { entry = 0; renderEntry(0); mode = 'list'; activate(['hero']); return; }
     mode = 'moving'; entry = 1; renderEntry(1);
-    tween(0, 1050, () => { mode = 'list'; activate(['hero']); });
+    faq.classList.add('in-flight');
+    tween(0, 1050, () => { mode = 'list'; activate(['hero']); faq.classList.remove('in-flight'); });
   }
   lpEq.addEventListener('click', (e) => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); enterEq(true); });
   // Hovering wakes the page behind it, and the window leans back a little toward where it's going.
