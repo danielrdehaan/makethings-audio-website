@@ -5,6 +5,7 @@ export const SUPABASE_URL = 'https://ffnowrgmdckdnnnvmstd.supabase.co'
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmbm93cmdtZGNrZG5ubnZtc3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMzUzMzcsImV4cCI6MjA5NzgxMTMzN30.AWw8faCc7gXOiDSB9Q_r3J7d6xikxypnf-r6szHdzqg'
 export const PLUGIN_API = 'https://stems.makethings.audio/api/plugin'
 export const APP_URL = 'https://stems.makethings.audio'
+export const ACCOUNT_API = 'https://stems.makethings.audio/api/account'
 // Cloudflare Turnstile's public site key for the sign-up form. Empty keeps /signup closed, whatever the switches say.
 export const TURNSTILE_SITE_KEY = ''
 // Paddle, for /buy. The token is its public client-side token; empty keeps /buy closed. Only 'live' reaches production.

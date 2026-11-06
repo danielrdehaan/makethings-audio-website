@@ -4,9 +4,11 @@
 // the server doesn't know which ones are installed there. The page says only that.
 //
 // Billing comes from GET /api/plugin/billing: what Paddle's webhooks recorded, with fresh links to Paddle's customer portal, which
-// is where cancelling and changing a payment method happen.
-import { APP_URL, PLUGIN_API } from './config.js'
+// is where cancelling and changing a payment method happen. Name, email, password and deleting the account are in account-settings.js.
+import { PLUGIN_API } from './config.js'
 import { dateOf, h, httpsOnly, pluginApi, requireSession, sb, signOut } from './account.js'
+import { accountRows } from './account-settings.js'
+import { verifiedFactors } from './mfa.js'
 
 const MACHINE_LIMIT = 3
 const root = document.getElementById('app')
@@ -14,18 +16,25 @@ const session = await requireSession()
 document.getElementById('who').textContent = session.user.email ?? ''
 document.getElementById('signOut').addEventListener('click', () => signOut())
 
-const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false, justPaid: new URLSearchParams(location.search).get('purchased') === '1' }
+const state = { sources: [], names: {}, machines: [], billing: null, billingFailed: false, salesOpen: false, trialClaimed: false, account: { name: '', stemshare: false, twoFactor: false, twoFactorRequired: false }, justPaid: new URLSearchParams(location.search).get('purchased') === '1' }
 // quiet: a look again in the background, whose failure leaves what's on the page alone.
 async function load({ quiet = false } = {}) {
-  const [sources, products, machines, billing, sales, claim] = await Promise.allSettled([
+  const [sources, products, machines, billing, sales, claim, profile, access, factors] = await Promise.allSettled([
     sb.rpc('my_plugin_entitlements'),
     sb.from('plugin_products').select('id, name'),
     sb.from('plugin_machines').select('id, name, created_at, last_seen_at').eq('user_id', session.user.id).is('revoked_at', null),
     pluginApi('billing'),
     fetch(`${PLUGIN_API}/sales-status`).then((r) => (r.ok ? r.json() : null)),
     sb.from('plugin_trial_claims').select('ends_at'),
+    sb.from('profiles').select('display_name').eq('id', session.user.id).maybeSingle(),
+    sb.rpc('my_stemshare_access'),
+    verifiedFactors(),
   ])
-  // Neither of these may stop the page: they only choose the words.
+  // None of these may stop the page: they only choose the words.
+  if (profile.status === 'fulfilled' && profile.value.data) state.account.name = profile.value.data.display_name ?? ''
+  state.account.stemshare = access.status === 'fulfilled' && access.value.data?.access === true
+  state.account.twoFactor = factors.status === 'fulfilled' && factors.value.length > 0
+  state.account.twoFactorRequired = sales.status === 'fulfilled' && sales.value?.mfaRequired === true
   state.salesOpen = sales.status === 'fulfilled' && sales.value?.open === true
   state.trialClaimed = claim.status === 'fulfilled' && (claim.value.data?.length ?? 0) > 0
   const rows = (r) => { if (r.status === 'rejected' || r.value.error) throw new Error('load'); return r.value.data ?? [] }
@@ -50,7 +59,7 @@ const nameOf = (id) => state.names[id] ?? id
 const productIds = () => [...new Set(state.sources.map((s) => s.product_id))]
 
 function render() {
-  root.replaceChildren(pluginsSection(), computersSection(), subscriptionSection(), purchasesSection(), profileSection())
+  root.replaceChildren(pluginsSection(), computersSection(), subscriptionSection(), purchasesSection(), settingsSection())
 }
 
 function section(id, title, right, ...body) {
@@ -211,9 +220,18 @@ function purchasesSection() {
         h('td', {}, httpsOnly(t.receiptUrl) ? h('a', { href: t.receiptUrl, rel: 'noopener' }, 'Receipt') : '—'))))))
 }
 
-function profileSection() {
-  return h('section', { class: 'sect' }, h('p', { class: 'msg muted small' },
-    'Your name, password and account settings are on ', h('a', { href: `${APP_URL}/profile` }, 'StemShare'), '.'))
+function settingsSection() {
+  return section('settings', 'Account settings', null, accountRows(session, state.account, accountDeleted))
+}
+
+function accountDeleted() {
+  document.getElementById('who').textContent = ''
+  document.getElementById('signOut').remove()
+  root.replaceChildren(h('section', { class: 'sect', 'data-account-deleted': true },
+    h('h2', { tabindex: '-1' }, 'Your account is deleted'),
+    h('p', { class: 'lede' }, 'Everything on it has been removed. Thanks for making things with us.'),
+    h('p', { class: 'fine' }, h('a', { href: '/' }, 'Back to Make Things'))))
+  root.querySelector('h2').focus()
 }
 
 // Back from checkout. The webhook usually takes seconds and may already have landed, so this asks whether a payment has just arrived
