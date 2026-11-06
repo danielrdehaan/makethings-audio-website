@@ -6,8 +6,9 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const PLUGIN_API = 'https://stems.makethings.audio/api/plugin'
 export const APP_URL = 'https://stems.makethings.audio'
 export const ACCOUNT_API = 'https://stems.makethings.audio/api/account'
-// Cloudflare Turnstile's public site key for the sign-up form. Empty keeps /signup closed, whatever the switches say.
-export const TURNSTILE_SITE_KEY = ''
+// Cloudflare Turnstile's public site key, for the forms on /signup, /edu and /plugins. Empty keeps /signup closed whatever the switches
+// say, and shows an email address instead of the other two.
+export const TURNSTILE_SITE_KEY = '0x4AAAAAAF1xIQDVjhIv7J6h'
 // Paddle, for /buy. The token is its public client-side token; empty keeps /buy closed. Only 'live' reaches production.
 export const PADDLE_ENV = 'sandbox'
 export const PADDLE_TOKEN = ''
