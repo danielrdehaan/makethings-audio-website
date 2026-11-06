@@ -13,33 +13,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/styles.css">
 <style>
-:root { --bg: #111416; --raise: #171b1e; --ink: #f4f3ef; --text: #c9cdd1; --muted: #9aa0a6; --line: #2c3337; --hit: #e07a6c; --accent: #7fa3d6; --ring: #4faf84; --amber: #d9a441; --f: 'Geist', -apple-system, Helvetica, Arial, sans-serif; --m: 'Geist Mono', ui-monospace, Menlo, monospace; color-scheme: dark; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.5 var(--f); min-height: 100svh; display: flex; flex-direction: column; }
-a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
-nav a:hover { color: var(--ink); }
-.door:hover .go, footer a:hover { text-decoration: underline; }
-.wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding-inline: 20px; }
-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 22px; }
-/* Fixed height and a shared baseline, so a change of font doesn't move the header. */
-.mark { display: flex; align-items: baseline; height: 1.12em; font: 700 clamp(22px, 2.2vw, 26px)/1.12 var(--f); letter-spacing: -.035em; color: var(--ink); white-space: nowrap; }
-nav { display: flex; gap: clamp(14px, 2.4vw, 28px); font-size: 15.5px; font-weight: 500; }
-h1 { margin: clamp(22px, 4vw, 44px) 0 clamp(26px, 3.4vw, 40px); font: 700 clamp(46px, 7.4vw, 104px)/.98 var(--f); letter-spacing: -.05em; color: var(--ink); }
-/* Every font sits in one grid cell, on the same baseline. */
-.rot { display: inline-grid; grid-template-rows: 1.12em; align-items: baseline; margin-left: .04em; transition: width .4s ease; letter-spacing: normal; }
-.rot span { grid-area: 1 / 1; line-height: 1; white-space: nowrap; transition: opacity .4s ease; }
-.rot .first { letter-spacing: -.035em; }
-.rot .waiting, .rot .out { opacity: 0; }
 .doors { display: grid; grid-template-columns: 2fr 1fr; gap: 26px; }
 .side { display: grid; gap: 22px; grid-template-rows: 1fr 1fr; }
 .door { display: flex; flex-direction: column; min-width: 0; }
+.door:hover .go { text-decoration: underline; }
 .art { flex: 1 1 0; min-height: 120px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; background: var(--raise); }
 .art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
 .door h2 { margin: 12px 0 2px; font: 700 clamp(20px, 2vw, 27px)/1.15 var(--f); letter-spacing: -.03em; color: var(--ink); }
 .door p { margin: 0; font-size: 15.5px; line-height: 1.4; }
-.go { display: block; margin-top: 7px; font: 500 12.5px/1 var(--m); letter-spacing: .08em; text-transform: uppercase; color: var(--hit); }
 .art.icon { position: relative; }
 .art.icon svg { position: absolute; inset: 16% 12%; width: 76%; height: 68%; }
 .made { padding-block: clamp(64px, 9vw, 130px) clamp(24px, 4vw, 56px); }
@@ -48,12 +31,7 @@ h1 { margin: clamp(22px, 4vw, 44px) 0 clamp(26px, 3.4vw, 40px); font: 700 clamp(
 .made .m { color: rgba(244, 243, 239, .32); font-weight: 400; margin-top: 10px; max-width: none; }
 .made .h em { font-style: normal; color: var(--ring); }
 .made .m em { font-style: normal; font-family: var(--m); font-weight: 500; letter-spacing: -.06em; color: var(--hit); }
-footer { margin-top: auto; padding-block: 30px 24px; font-size: 14px; color: var(--muted); }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; }
-footer span { display: flex; gap: 18px; flex-wrap: wrap; }
 @media (max-width: 720px) {
-  /* The doors are right below, so the phone's header keeps only what they don't cover. */
-  nav a:not(:last-child) { display: none; }
   .doors { grid-template-columns: 1fr; }
   .side { grid-template-rows: none; }
   .art { flex: none; height: 150px; }
@@ -96,63 +74,6 @@ footer span { display: flex; gap: 18px; flex-wrap: wrap; }
   </section>
 </div>
 <footer><div class="wrap"><span>© 2026 Make Things</span><span><a href="mailto:support@makethings.audio">support@makethings.audio</a></span></div></footer>
-<script>
-// One font at a time, and only the five letters it has to draw. Each is fetched before its turn, so a slow one never leaves a gap.
-const fonts = ['Pacifico', 'Permanent Marker', 'Bungee', 'Caveat', 'Lobster', 'Righteous', 'Satisfy', 'Fredoka', 'Abril Fatface', 'Press Start 2P', 'Sacramento', 'Concert One', 'Silkscreen', 'Comfortaa', 'Rubik Mono One', 'Playfair Display', 'Monoton', 'Russo One', 'Indie Flower', 'Bangers', 'Bungee Shade', 'Rubik Burned', 'Rubik Vinyl', 'Rubik Wet Paint', 'Rubik Glitch', 'Rubik Puddles', 'Rubik Spray Paint', 'Rubik Storm', 'Rubik Distressed', 'Rubik Maze', 'Creepster', 'Fascinate', 'Faster One', 'Rammetto One', 'Shrikhand', 'Orbitron', 'Audiowide', 'Bungee Inline', 'Megrim', 'Poiret One', 'Wallpoet', 'Notable', 'Vast Shadow', 'Londrina Solid', 'Londrina Outline', 'Londrina Shadow', 'Honk', 'Bagel Fat One', 'Moo Lah Lah', 'Nabla', 'Tiny5', 'Pixelify Sans', 'Jersey 10', 'Jersey 25', 'Kalnia', 'Jacquard 12', 'Micro 5', 'Foldit', 'Climate Crisis', 'Kablammo'];
-const rot = document.getElementById('rot');
-const fetched = new Map();
-function fetchFont(name) {
-  if (!fetched.has(name)) fetched.set(name, new Promise((done) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=' + name.replace(/ /g, '+') + '&text=audio&display=block';
-    link.onload = () => document.fonts.load('1em "' + name + '"', 'audio').then((faces) => done(faces.length > 0), () => done(false));
-    link.onerror = () => done(false);
-    document.head.appendChild(link);
-    setTimeout(() => done(false), 4000);
-  }));
-  return fetched.get(name);
-}
-let lastHue = -1;
-// Light enough to read on the dark page, and never close to the colour before.
-function nextColor() {
-  let h;
-  do { h = Math.floor(Math.random() * 360); } while (lastHue >= 0 && Math.min(Math.abs(h - lastHue), 360 - Math.abs(h - lastHue)) < 60);
-  lastHue = h;
-  return 'hsl(' + h + ',' + (65 + Math.floor(Math.random() * 25)) + '%,' + (62 + Math.floor(Math.random() * 12)) + '%)';
-}
-let at = -1, busy = false;
-async function cycle() {
-  if (busy || document.hidden) return;
-  busy = true;
-  try {
-    // A font that doesn't arrive is skipped.
-    let next = at, ok = false;
-    for (let tries = 0; tries < 5 && !ok; tries++) { next = (next + 1) % fonts.length; ok = await fetchFont(fonts[next]); }
-    if (!ok) return;
-    const current = rot.querySelector('span:not(.out)');
-    rot.style.width = current.getBoundingClientRect().width + 'px';
-    const span = document.createElement('span');
-    span.textContent = 'audio';
-    span.style.fontFamily = "'" + fonts[next] + "', cursive";
-    span.style.color = nextColor();
-    span.className = 'waiting';
-    rot.appendChild(span);
-    // The widest fonts shrink to the room left before the links.
-    const room = document.querySelector('nav').getBoundingClientRect().left - 20 - rot.getBoundingClientRect().left;
-    const wide = span.getBoundingClientRect().width;
-    if (wide > room) span.style.fontSize = (room / wide) + 'em';
-    const width = span.getBoundingClientRect().width;
-    rot.offsetHeight;
-    current.className = 'out';
-    span.className = '';
-    rot.style.width = width + 'px';
-    setTimeout(() => current.remove(), 400);
-    at = next;
-    fetchFont(fonts[(at + 1) % fonts.length]);
-  } finally { busy = false; }
-}
-const timer = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : (fetchFont(fonts[0]), setInterval(cycle, 2200));
-</script>
+<script src="/shared/wordmark.js"></script>
 </body>
 </html>
