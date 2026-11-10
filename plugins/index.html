@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Make Things Plugins</title>
 <script>if (!/\/plugins\/eq\/?$/.test(location.pathname)) document.documentElement.classList.add('list');</script>
+<script>try { const t = +sessionStorage.getItem('mt-fly-back'); if (t && Date.now() - t < 5000) document.documentElement.classList.add('fly-in'); } catch { /* no storage: no flight */ }</script>
 <meta name="description" content="Make Things plugins for your DAW: AU and VST3 for Mac. Windows coming.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Make Things Plugins">
@@ -268,8 +269,9 @@ body { background: var(--bg); }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--bg); margin: 0; padding: 0; perspective: none; }
 .glow2 { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(45% 40% at 32% 62%, rgba(224, 122, 108, .13), transparent 70%), radial-gradient(42% 38% at 72% 66%, rgba(79, 175, 132, .11), transparent 70%); }
 .persp { position: absolute; inset: 0; perspective: 1800px; perspective-origin: 50% 40%; }
-.world { position: absolute; left: 0; top: 0; width: 1000px; height: 575px; transform-origin: 0 0; will-change: transform; border-radius: 6px; background: #111416; box-shadow: 0 0 0 1px var(--line), 0 40px 130px -30px rgba(0, 0, 0, .9); overflow: hidden; }
-.world video, .world img { position: absolute; left: 0; top: 0; width: 100%; height: auto; max-width: none; opacity: 0; visibility: hidden; }
+.world { position: absolute; left: 0; top: 0; width: 1000px; height: 564.26px; transform-origin: 0 0; will-change: transform; border-radius: 6px; background: #111416; box-shadow: 0 0 0 1px var(--line), 0 40px 130px -30px rgba(0, 0, 0, .9); overflow: hidden; }
+.world video, .world img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; opacity: 0; visibility: hidden; }
+.world [data-box] { object-fit: fill; }
 .dimmer { position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; }
 .scrim { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
 .stage.wide .scrim { background: linear-gradient(90deg, rgba(17, 20, 22, .99) 0, rgba(17, 20, 22, .97) 35%, rgba(17, 20, 22, 0) 45%); }
@@ -318,7 +320,7 @@ html.still .stage { position: static; height: auto; overflow: visible; padding-b
 html.still .persp, html.still .scrim, html.still .dimmer, html.still .bar, html.still .glow2 { display: none; }
 html.still .mark-in { position: static; }
 html.still .t { position: static; opacity: 1 !important; visibility: visible !important; transform: none !important; width: auto !important; max-width: 1000px !important; margin: 80px auto 0 !important; padding-inline: 20px; text-align: left; }
-html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top: 24px; box-shadow: 0 0 0 1px var(--line); }
+html.still .t-img { display: block; width: auto; max-width: 100%; max-height: 62vh; border-radius: 10px; margin-top: 24px; box-shadow: 0 0 0 1px var(--line); }
 html.still .stage .mc { position: static; opacity: 1; visibility: visible; transform: none; overflow-x: auto; margin-top: 24px; }
 html.still .stage .mc-track { transform: none !important; }
 
@@ -353,7 +355,7 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-head p { margin: 10px 0 0; font-size: clamp(15px, 1.35vw, 18px); color: var(--muted); }
 .lp-row { display: flex; gap: clamp(16px, 2vw, 28px); align-items: stretch; min-height: 0; }
 .lp-eq { display: block; flex: 0 0 min(68%, calc((100svh - 300px) * 1.739)); color: inherit; text-decoration: none; }
-.lp-slot { position: relative; aspect-ratio: 1000 / 575; border-radius: 6px; }
+.lp-slot { position: relative; aspect-ratio: 1276 / 720; border-radius: 6px; }
 .lp-slot img { display: none; }
 .lp-cap { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; padding-top: 14px; will-change: opacity; }
 .lp-cap h2, .lp-ph h2 { font: 700 clamp(18px, 1.7vw, 24px)/1.15 var(--f-display); letter-spacing: -0.025em; color: var(--ink); margin: 0; }
@@ -374,6 +376,13 @@ html.list .lp { display: flex; visibility: visible; }
 .lp-beta { position: absolute; left: 50%; top: 50%; padding: .32em .72em .36em; border-radius: .28em; background: #ffd23f; color: #111416; font: 800 clamp(20px, 3.4vw, 46px)/1 var(--f-display); letter-spacing: -0.03em; white-space: nowrap; transform: translate(-50%, -50%) rotate(-5deg); box-shadow: 0 0 0 .09em #f4f3ef, 0 .3em .9em rgba(0, 0, 0, .55); pointer-events: none; }
 .lp-beta.small { font-size: clamp(14px, 1.7vw, 24px); }
 .lp-ph p { margin: 4px 0 0; font-size: 14px; line-height: 1.35; color: var(--text); }
+/* The Modular card's picture: the top of the real window, at its full width, as the Modular page's flight starts. */
+.lp-shot { background: var(--raise); }
+.lp-shot img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 50% 0; }
+html.fly-in .stage > .glow2, html.fly-in .stage > .persp, html.fly-in .lp-head, html.fly-in .lp-eq, html.fly-in .lp-side .lp-ph:not(.mod-card), html.fly-in .mod-card > :not(.lp-art), html.fly-in .mod-card .lp-beta, html.fly-in .lp-faq { opacity: 0; }
+a.lp-ph { text-decoration: none; }
+.lp-ph .lp-go { display: block; margin-top: 6px; }
+a.lp-ph:hover .lp-go, a.lp-ph:focus-visible .lp-go { transform: translateX(4px); }
 .lp-ph em { display: block; margin-top: 6px; font: 500 11px var(--f-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .stage.tall .lp { padding-top: 66px; }
 .stage.tall .lp-row { flex-direction: column; }
@@ -385,7 +394,7 @@ html.list .lp { display: flex; visibility: visible; }
 /* The list's own close: the EQ page's statement, then the questions about it. Part of the list, not the EQ page. */
 .lp-faq { display: none; }
 html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; transition: opacity .25s ease; }
-html.list .lp-faq.in-flight { opacity: 0; pointer-events: none; }
+html.list .lp-faq.in-flight { pointer-events: none; }
 .lp-faq .made { padding-block: clamp(64px, 9vw, 130px) 0; text-align: left; }
 .lp-faq .made p { margin-inline: 0; }
 .lp-faq h2 { font: 700 clamp(30px, 3.6vw, 48px)/1.05 var(--f-display); letter-spacing: -0.035em; color: var(--ink); margin: 0 0 clamp(24px, 3vw, 40px); }
@@ -438,22 +447,39 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     <div class="glow2" aria-hidden="true"></div>
     <div class="persp" aria-hidden="true">
       <div class="world" id="world">
-      <video data-clip="hero" src="/plugins/media/hero.mp4" poster="/plugins/media/hero.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="inst" src="/plugins/media/inst.mp4" data-poster="/plugins/media/inst.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <img data-clip="menu" data-src="/plugins/media/menu.jpg" alt="" aria-hidden="true">
-      <video data-clip="key" src="/plugins/media/key.mp4" data-poster="/plugins/media/key.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="bass" src="/plugins/media/bass.mp4" data-poster="/plugins/media/bass.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="vocal" src="/plugins/media/vocal.mp4" data-poster="/plugins/media/vocal.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="hits" src="/plugins/media/hits.mp4" data-poster="/plugins/media/hits.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="type" src="/plugins/media/type.mp4" data-poster="/plugins/media/type.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="fx" src="/plugins/media/fx.mp4" data-poster="/plugins/media/fx.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="shapes" src="/plugins/media/shapes.mp4" data-poster="/plugins/media/shapes.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="alone" src="/plugins/media/alone.mp4" data-poster="/plugins/media/alone.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="feedback" src="/plugins/media/feedback.mp4" data-poster="/plugins/media/feedback.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <video data-clip="channel" src="/plugins/media/channel.mp4" data-poster="/plugins/media/channel.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="hero" src="/plugins/media/hero.mp4" poster="/plugins/media/hero.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="inst" src="/plugins/media/inst.mp4" data-poster="/plugins/media/inst.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="mask" src="/plugins/media/mask.mp4" data-poster="/plugins/media/mask.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="menu" src="/plugins/media/menu.mp4" data-poster="/plugins/media/menu.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="key" src="/plugins/media/key.mp4" data-poster="/plugins/media/key.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="bass" src="/plugins/media/bass.mp4" data-poster="/plugins/media/bass.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="vocal" src="/plugins/media/vocal.mp4" data-poster="/plugins/media/vocal.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="hits" src="/plugins/media/hits.mp4" data-poster="/plugins/media/hits.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="type" src="/plugins/media/type.mp4" data-poster="/plugins/media/type.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="fx" src="/plugins/media/fx.mp4" data-poster="/plugins/media/fx.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="shapes" src="/plugins/media/shapes.mp4" data-poster="/plugins/media/shapes.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="alone" src="/plugins/media/alone.mp4" data-poster="/plugins/media/alone.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="feedback" src="/plugins/media/feedback.mp4" data-poster="/plugins/media/feedback.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="channel" src="/plugins/media/channel.mp4" data-poster="/plugins/media/channel.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="lanes" src="/plugins/media/lanes.mp4" data-poster="/plugins/media/lanes.jpg" width="2560" height="1446" muted loop playsinline preload="none" aria-hidden="true"></video>
       <img data-clip="char" data-src="/plugins/media/char.jpg" alt="" aria-hidden="true">
-      <video data-clip="lanes" src="/plugins/media/lanes.mp4" data-poster="/plugins/media/lanes.jpg" width="2340" height="1344" muted loop playsinline preload="none" aria-hidden="true"></video>
-      <img data-clip="speakers" data-src="/plugins/media/speakers.jpg" alt="" aria-hidden="true">
+      <video data-clip="inst-list" data-box="41,37,270,357" src="/plugins/media/inst-list.mp4" data-poster="/plugins/media/inst-list.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="mask-graph" data-box="455,41,542,349" src="/plugins/media/mask-graph.mp4" data-poster="/plugins/media/mask-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="menu-card" data-box="285,389,208,325" src="/plugins/media/menu-card.mp4" data-poster="/plugins/media/menu-card.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="key-graph" data-box="674,41,589,349" src="/plugins/media/key-graph.mp4" data-poster="/plugins/media/key-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="bass-graph" data-box="313,41,570,349" src="/plugins/media/bass-graph.mp4" data-poster="/plugins/media/bass-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="vocal-graph" data-box="693,41,570,349" src="/plugins/media/vocal-graph.mp4" data-poster="/plugins/media/vocal-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="hits-graph" data-box="598,41,665,349" src="/plugins/media/hits-graph.mp4" data-poster="/plugins/media/hits-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="hits-cards" data-box="487,389,410,325" src="/plugins/media/hits-cards.mp4" data-poster="/plugins/media/hits-cards.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="type-graph" data-box="455,41,808,349" src="/plugins/media/type-graph.mp4" data-poster="/plugins/media/type-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="fx-card" data-box="487,389,208,325" src="/plugins/media/fx-card.mp4" data-poster="/plugins/media/fx-card.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="shapes-card" data-box="487,389,208,325" src="/plugins/media/shapes-card.mp4" data-poster="/plugins/media/shapes-card.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="alone-view" data-box="487,122,483,592" src="/plugins/media/alone-view.mp4" data-poster="/plugins/media/alone-view.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="feedback-card" data-box="487,389,208,325" src="/plugins/media/feedback-card.mp4" data-poster="/plugins/media/feedback-card.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <video data-clip="channel-card" data-box="487,389,208,325" src="/plugins/media/channel-card.mp4" data-poster="/plugins/media/channel-card.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <img data-clip="char-sheet" data-box="90,422,194,285" data-src="/plugins/media/char-sheet.jpg" alt="" aria-hidden="true">
+      <video data-clip="lanes-graph" data-box="313,41,950,349" src="/plugins/media/lanes-graph.mp4" data-poster="/plugins/media/lanes-graph.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <img data-clip="speakers-close" data-box="487,389,208,325" data-src="/plugins/media/speakers-close.jpg" alt="" aria-hidden="true">
       </div>
     </div>
     <div class="dimmer" id="dimmer"></div>
@@ -504,11 +530,12 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
             <p>The compressor that gates too, and shows every move.</p>
             <em>Coming</em>
           </div>
-          <div class="lp-ph">
-            <div class="lp-art g-modular"><span class="lp-beta small">Beta Testing</span></div>
+          <a class="lp-ph mod-card" id="lpMod" href="/plugins/modular/">
+            <div class="lp-art lp-shot" id="lpModArt"><img src="/plugins/media/modular/hero.jpg" alt="The Make Things Modular window." decoding="async"><span class="lp-beta small">Beta Testing</span></div>
             <h2>Modular</h2>
             <p>The modular rack that fits any slot, and plays anything.</p>
-          </div>
+            <span class="lp-go" aria-hidden="true">See it →</span>
+          </a>
         </div>
       </div>
     </section>
@@ -536,91 +563,91 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       <h2>All your session’s EQs.<br>Live.<br class="wb"> In one window.</h2>
       <p class="line">Click one and this window controls it, with automation and undo going to that EQ. Put any other EQ’s curve or spectrum behind the one you’re editing.</p>
       <ul class="cx"><li>Overlay curves</li><li>Overlay spectra</li><li>Solo · Mute · Bypass</li><li>Your names</li></ul>
-      <img class="t-img" src="/plugins/media/inst.jpg" alt="The Instances list up close." loading="lazy">
+      <img class="t-img" src="/plugins/media/inst-list.jpg" alt="The Instances list up close." loading="lazy">
     </div>
     <div class="t" data-b="3">
       <p class="then">Turn on masking.</p>
       <h2>There’s<br><span class="hit">your fight.</span></h2>
       <p class="line">Pick the tracks to check against. The spectrum takes each track’s colour wherever that track is louder than this one. Compare all of it, only the hits, or only the sustain.</p>
-      <img class="t-img" src="/plugins/media/hero.jpg" alt="The vocal’s spectrum tinted where the guitars and keys are louder." loading="lazy">
+      <img class="t-img" src="/plugins/media/mask-graph.jpg" alt="The vocal’s spectrum tinted where the guitars and keys are louder." loading="lazy">
     </div>
     <div class="t" data-b="4">
       <p class="then">Now the track in the way.</p>
       <h2>Any band can listen<br>to <span class="hit">any track.</span></h2>
       <p class="line">Open a band’s Dynamics, Transient or Drive and pick another EQ from the list, before or after that EQ’s own processing. No sidechain routing, and each band can pick its own.</p>
-      <img class="t-img" src="/plugins/media/menu.jpg" alt="A band’s Listens to sheet listing other tracks’ EQs, with Pre and Post on the chosen one." loading="lazy">
+      <img class="t-img" src="/plugins/media/menu-card.jpg" alt="A band’s Listens to sheet listing other tracks’ EQs, with Pre and Post on the chosen one." loading="lazy">
     </div>
     <div class="t" data-b="5">
       <h2>Duck one band.<br><span class="hit">Only while the other plays.</span></h2>
       <p class="line">Set a threshold and a range. When the other track crosses the threshold, this one band dips, then recovers at the release you set. The rest of the track doesn’t move.</p>
-      <img class="t-img" src="/plugins/media/key.jpg" alt="The guitars’ band at 2.4 kHz dipping as the vocal sings, with the vocal’s spectrum overlaid." loading="lazy">
+      <img class="t-img" src="/plugins/media/key-graph.jpg" alt="The guitars’ band at 2.4 kHz dipping as the vocal sings, with the vocal’s spectrum overlaid." loading="lazy">
     </div>
     <div class="t" data-b="6">
       <p class="then">Same trick, down low.</p>
       <h2>Duck the lows.<br><span class="hit">Only on the hits.</span></h2>
       <p class="line">Put a dynamic band on one track’s low end and let it listen to another. Only that band moves, so the rest of the track keeps its level and tone.</p>
       <ul class="cx"><li>Each band its own key</li><li>Pre or Post</li><li>Another band</li><li>Hits</li><li>Drive</li></ul><p class="tiny">Works between EQs in the same host process.</p>
-      <img class="t-img" src="/plugins/media/bass.jpg" alt="The bass’s band at 70 Hz dipping with the drums." loading="lazy">
+      <img class="t-img" src="/plugins/media/bass-graph.jpg" alt="The bass’s band at 70 Hz dipping with the drums." loading="lazy">
     </div>
     <div class="t" data-b="7">
       <p class="then">It’s out front now. And some notes bite.</p>
       <h2>Don’t dull every note.<br><span class="ring">Catch what rings.</span></h2>
       <p class="line">Static holds its gain. Dynamic moves the whole band with its level. Spectral lets each frequency follow its own level, so only what rings moves. One click switches a band.</p>
-      <img class="t-img" src="/plugins/media/vocal.jpg" alt="A spectral band cutting only the frequencies that stand out." loading="lazy">
+      <img class="t-img" src="/plugins/media/vocal-graph.jpg" alt="A spectral band cutting only the frequencies that stand out." loading="lazy">
     </div>
     <div class="t" data-b="8">
       <p class="then">On to the next track. It’s boxy, but you can’t lose the attack.</p>
       <h2>One band.<br>Two <span class="hit">gains.</span></h2>
       <p class="line">A band can split its sound into the hit and everything after it, with a gain for each. Lift the attack and pull down the ring at the same frequency.</p>
       <div class="gains"><div><b class="hit">Boost</b><span>on the hit</span></div><div><b class="ring">Cut</b><span>in the ring</span></div></div>
-      <img class="t-img" src="/plugins/media/hits.jpg" alt="A band at 3.6 kHz jumping on each hit and easing back." loading="lazy">
+      <img class="t-img" src="/plugins/media/hits-graph.jpg" alt="A band at 3.6 kHz jumping on each hit and easing back." loading="lazy">
     </div>
     <div class="t" data-b="9">
       <h2>One for the hit.<br>One for <span class="ring">the rest.</span></h2>
       <p class="line">Transient and Sustain are on every band, and a lane shows you the hits. The detector can listen to this band, another band, the whole input or another EQ.</p>
-      <img class="t-img" src="/plugins/media/hits.jpg" alt="Two band cards on their Transient tabs." loading="lazy">
+      <img class="t-img" src="/plugins/media/hits-cards.jpg" alt="Two band cards on their Transient tabs." loading="lazy">
     </div>
     <div class="t" data-b="10">
       <p class="then">A little air on top?</p>
       <h2>Type it.</h2>
       <p class="line"><span class="mono">hs 10k +2</span>, Return. The band plays on the curve as you type. Use a type, a frequency or note, a gain and a Q in any order, like <span class="mono">lc 80 48</span> or <span class="mono">notch A1</span>.</p>
-      <img class="t-img" src="/plugins/media/type.jpg" alt="Typing hs 10k +2 into the Add band box." loading="lazy">
+      <img class="t-img" src="/plugins/media/type-graph.jpg" alt="Typing hs 10k +2 into the Add band box." loading="lazy">
     </div>
     <div class="t" data-b="11">
       <p class="then">Clean. Maybe too clean.</p>
       <h2>Drive one band.<br><span class="hit">Leave the rest.</span></h2>
       <p class="line">Only what the band covers goes in, and only the distortion comes back, so the band’s own level stays at its gain. Up to 36 dB, with its own Tone and Mix.</p>
       <ul class="cx"><li>Drive</li><li>Tone</li><li>Mix</li><li>Bias</li><li>Apply to</li><li>Follows</li></ul>
-      <img class="t-img" src="/plugins/media/fx.jpg" alt="A band’s Drive tab: Shape, Drive, Tone, Mix, Bias, Apply to and Follows." loading="lazy">
+      <img class="t-img" src="/plugins/media/fx-card.jpg" alt="A band’s Drive tab: Shape, Drive, Tone, Mix, Bias, Apply to and Follows." loading="lazy">
     </div>
     <div class="t" data-b="12">
       <h2>Six ways to<br><span class="hit">drive a band.</span></h2>
       <p class="line">Round it off, fold it back or crush it. Bias adds even harmonics, Spread drives left and right differently, and Dynamics undoes the squash and keeps the harmonics.</p>
       <ul class="cx"><li>Tube</li><li>Tape</li><li>Fuzz</li><li>Fold</li><li>Rectify</li><li>Crush</li></ul><p class="tiny">Pictures show what each shape does as you change it.</p>
-      <img class="t-img" src="/plugins/media/shapes.jpg" alt="A band’s Drive sheet: its shapes as icons, with pictures of the shape, its level and its Drive as it follows." loading="lazy">
+      <img class="t-img" src="/plugins/media/shapes-card.jpg" alt="A band’s Drive sheet: its shapes as icons, with pictures of the shape, its level and its Drive as it follows." loading="lazy">
     </div>
     <div class="t" data-b="13">
       <p class="then">Not sure what it’s adding?</p>
       <h2>Hold to hear<br><span class="hit">it alone.</span></h2>
       <p class="line">Hold the power button on a band’s Dynamics, Transient, Drive or Feedback, and you hear only what it changes. Let go and the mix is back. A click still turns it on or off.</p>
-      <img class="t-img" src="/plugins/media/alone.jpg" alt="Holding the Drive power button: the band’s readout reads Drive alone, and the spectrum drops to what Drive adds." loading="lazy">
+      <img class="t-img" src="/plugins/media/alone-view.jpg" alt="Holding the Drive power button: the band’s readout reads Drive alone, and the spectrum drops to what Drive adds." loading="lazy">
     </div>
     <div class="t" data-b="14">
       <p class="then">Or let it ring.</p>
       <h2>Feedback.<br><span class="ring">Inside the band.</span></h2>
       <p class="line">Tuned, the band rings at a pitch set by its frequency. In ms, it echoes on just that band. The loop runs through the band’s own filter and a soft clip, so it never runs away.</p>
-      <img class="t-img" src="/plugins/media/feedback.jpg" alt="A band’s Feedback tab: Tuned or ms, Amount and Time, and a line saying what you’ll hear." loading="lazy">
+      <img class="t-img" src="/plugins/media/feedback-card.jpg" alt="A band’s Feedback tab: Tuned or ms, Amount and Time, and a line saying what you’ll hear." loading="lazy">
     </div>
     <div class="t" data-b="15">
       <h2>Then place<br>the <span class="hit">change.</span></h2>
       <p class="line">Pan and Width move only what the band adds or takes away, so the rest of the track stays put. A band can also run on Stereo, Left, Right, Mid or Side.</p>
-      <img class="t-img" src="/plugins/media/channel.jpg" alt="A band’s Channel sheet: Stereo, Left, Right, Mid or Side, with Pan and Width." loading="lazy">
+      <img class="t-img" src="/plugins/media/channel-card.jpg" alt="A band’s Channel sheet: Stereo, Left, Right, Mid or Side, with Pan and Width." loading="lazy">
     </div>
     <div class="t" data-b="16">
       <p class="then">Then the whole sound.</p>
       <h2>Eight<br><span class="hit">characters.</span></h2>
       <p class="line">A final stage after the bands: Clean, Subtle, Warm, Tape, Tube, Fuzz, Fold or Crush. Up to 36 dB of drive, on everything, only the hits, or only the rest.</p>
-      <img class="t-img" src="/plugins/media/char.jpg" alt="The Character sheet in the band card’s place: eight shapes, Drive, Tone, Mix, Bias, Spread, Dynamics, Follows and Apply to." loading="lazy">
+      <img class="t-img" src="/plugins/media/char-sheet.jpg" alt="The Character sheet in the band card’s place: eight shapes, Drive, Tone, Mix, Bias, Spread, Dynamics, Follows and Apply to." loading="lazy">
     </div>
     <div class="t" data-b="17">
       <p class="then">It all sits right now. But it sits still.</p>
@@ -633,13 +660,13 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
       <h2>Same EQ.<br><span class="ring">Up to 16 channels.</span></h2>
       <p class="line">Every band picks a lane: stereo, left, right, mid or side. Each lane draws its own curve, so you can see what each part of the sound is getting.</p>
       <ul class="cx"><li>Stereo</li><li>Left · Right</li><li>Mid · Side</li></ul>
-      <img class="t-img" src="/plugins/media/lanes.jpg" alt="Bands on Mid, Left, Right and Side, each lane drawing its own curve." loading="lazy">
+      <img class="t-img" src="/plugins/media/lanes-graph.jpg" alt="Bands on Mid, Left, Right and Side, each lane drawing its own curve." loading="lazy">
     </div>
     <div class="t" data-b="19">
       <h2>Every speaker.<br>One curve.</h2>
       <p class="line">On a surround track, pick a band’s speakers on a map of the room, or a group such as the tops. Shared and Differences work on what they have in common, or what sets them apart.</p>
       <ul class="cx"><li>5.1</li><li>7.1</li><li>5.1.4</li><li>7.1.4</li><li>up to 16 ch</li></ul><p class="tiny">Surround in Logic and REAPER; up to 16 numbered channels in REAPER.</p>
-      <img class="t-img" src="/plugins/media/speakers.jpg" alt="A band’s Channel sheet on a 7.1.4 bed: a map of the speakers, with the four tops chosen." loading="lazy">
+      <img class="t-img" src="/plugins/media/speakers-close.jpg" alt="A band’s Channel sheet on a 7.1.4 bed: a map of the speakers, with the four tops chosen." loading="lazy">
     </div>
     <div class="t t-center" data-b="20">
       <p class="then">That was one session.</p>
@@ -857,7 +884,29 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
 
   // The stage: scroll is a position along the beats; between two beats the camera flies, the clips crossfade and the text
   // changes. Only the clips in view play.
-  const BEATS = [{"c": "hero", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0, "strip": 0, "hero": 1, "center": 0, "restart": 0, "id": "top"}, {"c": "inst", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "see"}, {"c": "inst", "r": [73, 108, 408, 770], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hero", "r": [420, 330, 1400, 770], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "menu", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "room"}, {"c": "key", "r": [960, 250, 1900, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "bass", "r": [140, 280, 1060, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "vocal", "r": [900, 250, 1850, 720], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "edge"}, {"c": "hits", "r": [800, 240, 1800, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "drums"}, {"c": "hits", "r": [640, 765, 1165, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "type", "r": [760, 500, 1360, 800], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 1, "id": null}, {"c": "fx", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "drive"}, {"c": "shapes", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "alone", "r": [430, 330, 1130, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "feedback", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "channel", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "char", "r": [640, 765, 906, 1178], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hits", "r": [20, 56, 2000, 1190], "len": 3.4, "dim": 1, "strip": 1, "hero": 0, "center": 0, "restart": 0, "id": "lift"}, {"c": "lanes", "r": [113, 108, 1985, 760], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": "ask"}, {"c": "speakers", "r": [978, 778, 1244, 1184], "len": 1, "dim": 0, "strip": 0, "hero": 0, "center": 0, "restart": 0, "id": null}, {"c": "hero", "r": [20, 56, 2000, 1190], "len": 1, "dim": 0.6, "strip": 0, "hero": 0, "center": 1, "restart": 0, "id": "end"}];
+  const BEATS = [
+    { c: "hero", r: [0, 0, 1276, 720], len: 1, hero: 1, id: "top" },
+    { c: "inst", r: [0, 0, 1276, 720], len: 1, id: "see" },
+    { c: "inst-list", under: "inst", r: [41, 37, 311, 394], len: 1 },
+    { c: "mask-graph", under: "mask", r: [455, 41, 997, 390], len: 1 },
+    { c: "menu-card", under: "menu", r: [285, 389, 493, 714], len: 1, id: "room" },
+    { c: "key-graph", under: "key", r: [674, 41, 1263, 390], len: 1 },
+    { c: "bass-graph", under: "bass", r: [313, 41, 883, 390], len: 1 },
+    { c: "vocal-graph", under: "vocal", r: [693, 41, 1263, 390], len: 1, id: "edge" },
+    { c: "hits-graph", under: "hits", r: [598, 41, 1263, 390], len: 1, id: "drums" },
+    { c: "hits-cards", under: "hits", r: [487, 389, 897, 714], len: 1 },
+    { c: "type-graph", under: "type", r: [455, 41, 1263, 390], len: 1 },
+    { c: "fx-card", under: "fx", r: [487, 389, 695, 714], len: 1, id: "drive" },
+    { c: "shapes-card", under: "shapes", r: [487, 389, 695, 714], len: 1 },
+    { c: "alone-view", under: "alone", r: [487, 122, 970, 714], len: 1 },
+    { c: "feedback-card", under: "feedback", r: [487, 389, 695, 714], len: 1 },
+    { c: "channel-card", under: "channel", r: [487, 389, 695, 714], len: 1 },
+    { c: "char-sheet", under: "char", r: [90, 422, 284, 707], len: 1 },
+    { c: "hits", r: [0, 0, 1276, 720], len: 3.4, dim: 1, id: "lift" },
+    { c: "lanes-graph", under: "lanes", r: [313, 41, 1263, 390], len: 1, id: "ask" },
+    { c: "speakers-close", under: "channel", r: [487, 389, 695, 714], len: 1 },
+    { c: "hero", r: [0, 0, 1276, 720], len: 1, dim: 0.6, center: 1, id: "end" },
+  ];
   const stage = document.getElementById('stage'), scroller = document.getElementById('scroller'), world = document.getElementById('world');
   const dimmer = document.getElementById('dimmer'), scrim = document.getElementById('scrim'), mc = document.getElementById('modCarousel'), track = document.getElementById('modTrack');
   const bar = document.getElementById('bar'), markIn = document.getElementById('markIn');
@@ -893,8 +942,15 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     texts[BEATS.findIndex((b) => b.id === 'lift')].after(mc);
     return;
   }
-  const W0 = 1000, ASPECT = 1770 / 3080;
-  const norm = ([x0, y0, x1, y1]) => [(x0 * 1.56 - 20) / 3080, (y0 * 1.56 - 88) / 3080, (x1 * 1.56 - 20) / 3080, (y1 * 1.56 - 88) / 3080];
+  // r and data-box are in the takes' own units: CSS pixels of the 1276 × 720 EQ window.
+  const W0 = 1000, H0 = 564.26, VW = 1276;
+  for (const el of world.querySelectorAll('[data-box]')) {
+    const [x, y, w, h] = el.dataset.box.split(',').map(Number), k = W0 / VW;
+    Object.assign(el.style, { left: x * k + 'px', top: y * k + 'px', width: w * k + 'px', height: h * k + 'px' });
+  }
+  const isClose = (n) => !!layers[n]?.dataset.box;
+  const layersOf = (b) => (b.under ? [b.under, b.c] : [b.c]);
+  const norm = ([x0, y0, x1, y1]) => [x0 / VW, y0 / VW, x1 / VW, y1 / VW];
   const smooth = (t) => { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
   let vw = 0, vh = 0, step = 0, wide = true, cams = [], starts = [], total = 0;
   // 'list': the plugin list. 'moving': flying between it and the EQ page. 'eq': the scroll page, exactly as it is on its own.
@@ -920,7 +976,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     // The list's camera: the whole window, flat, exactly over its slot.
     if (html.classList.contains('list')) {
       const r = lpSlot.getBoundingClientRect(), st = stage.getBoundingClientRect();
-      listCam = { cx: W0 / 2, cy: 575 / 2, sx: r.left - st.left + r.width / 2, sy: r.top - st.top + r.height / 2, lz: Math.log(r.width / W0), rot: 0 };
+      listCam = { cx: W0 / 2, cy: H0 / 2, sx: r.left - st.left + r.width / 2, sy: r.top - st.top + r.height / 2, lz: Math.log(r.width / W0), rot: 0 };
     }
   }
   // The stage stays a full screen for the flight to the EQ page, so the row rarely fills it. What follows comes up over the part it doesn't
@@ -936,15 +992,17 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
   const scrollTopOf = () => scroller.getBoundingClientRect().top + scrollY;
   const beatAt = (id) => BEATS.findIndex((b) => b.id === id);
   links.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const i = beatAt(a.dataset.go); scrollTo({ top: scrollTopOf() + starts[i] * step, behavior: 'auto' }); }));
-  let pos = 0, shown = -1, active = new Set();
-  function activate(names) {
-    const want = new Set(names);
+  let pos = 0, shown = -1;
+  // Only the clips of the beat the camera has reached play; the ones it's flying to are fetched and wait on their first frame.
+  function activate(playing, coming = []) {
+    playing = new Set(playing); coming = new Set(coming);
     for (const [n, el] of Object.entries(layers)) {
       if (!el.pause) continue;
-      if (want.has(n)) { if (el.preload !== 'auto') el.preload = 'auto'; if (el.paused) { const p = el.play(); if (p) p.catch(() => {}); } }
-      else if (!el.paused) el.pause();
+      if (playing.has(n) || coming.has(n)) { if (el.preload !== 'auto') el.preload = 'auto'; }
+      if (playing.has(n)) { if (el.paused) { const r = el.play(); if (r) r.catch(() => {}); } continue; }
+      if (!el.paused) el.pause();
+      if (coming.has(n) && el.currentTime > .05) { try { el.currentTime = 0; } catch { /* not ready */ } }
     }
-    active = want;
   }
   function render(p) {
     // p: position in beat units along `starts`; a long beat holds, the fly-over is always one unit before the next beat.
@@ -964,17 +1022,26 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     const z = Math.exp(lerp(A.lz, C.lz) - dolly);
     const cx = lerp(A.cx, C.cx), cy = lerp(A.cy, C.cy), sx = lerp(A.sx, C.sx), sy = lerp(A.sy, C.sy), rot = lerp(A.rot, C.rot);
     world.style.transform = 'translate3d(' + (sx - cx * z).toFixed(2) + 'px,' + (sy - cy * z).toFixed(2) + 'px,0) rotateX(' + rot.toFixed(2) + 'deg) scale(' + z.toFixed(4) + ')';
-    // Clips: the coming one fades in over the current one.
+    // Clips: the coming ones fade in over the current ones. A full-window clip stays under to the end of the flight; a
+    // close-up the camera is leaving fades out, so the window behind it shows as the camera pulls back.
+    const inA = new Set(layersOf(b)), inB = new Set(i === BEATS.length - 1 ? [] : layersOf(next));
     for (const [n, el] of Object.entries(layers)) {
-      const isA = n === b.c, isB = n === next.c && n !== b.c && fade > 0;
-      el.style.visibility = isA || isB ? 'visible' : 'hidden';
-      el.style.opacity = isB ? fade.toFixed(3) : isA ? '1' : '0';
-      el.style.zIndex = isB ? 2 : 1;
+      const a = inA.has(n), bb = inB.has(n) && fade > 0;
+      const o = a && inB.has(n) ? 1 : a ? (isClose(n) ? 1 - fade : 1) : bb ? fade : 0;
+      el.style.visibility = o > 0 ? 'visible' : 'hidden';
+      el.style.opacity = o.toFixed(3);
+      el.style.zIndex = (isClose(n) ? 3 : 1) + (bb && !a ? 1 : 0);
     }
-    const names = [b.c, next.c];
-    if (BEATS[i + 2] && f > flyFrom) names.push(BEATS[i + 2].c);
-    activate(names);
-    if (i !== shown) { const r = layers[b.c]; if (b.restart && r.pause) { try { r.currentTime = 0; } catch { /* not ready */ } } shown = i; }
+    // A beat is reached when the camera lands on it, a little before its text is fully in. Its clips start from the
+    // beginning then, scrolling down or back up.
+    let arrived = 0;
+    for (let k = 0; k < BEATS.length; k++) if (p >= starts[k] - .28) arrived = k;
+    const playing = new Set(layersOf(BEATS[arrived]));
+    if (arrived !== shown) {
+      for (const n of playing) { const r = layers[n]; if (r.pause) { try { r.currentTime = 0; } catch { /* not ready */ } } }
+      shown = arrived;
+    }
+    activate(playing, [...layersOf(next), ...(BEATS[i + 2] ? layersOf(BEATS[i + 2]) : [])].filter((n) => !playing.has(n)));
     // Text, dim and scrim
     const textEdge = (t) => smooth(t / .22);
     texts.forEach((el, k) => {
@@ -1030,16 +1097,30 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     mc.style.visibility = 'hidden'; mc.style.opacity = 0;
     bar.style.opacity = '0.000'; bar.style.pointerEvents = 'none';
     markIn.style.opacity = '1.000'; markIn.style.pointerEvents = 'auto';
-    const away = smooth(x / .4), tag = smooth((x - .6) / .4);
-    lpHead.style.opacity = (1 - away).toFixed(3); lpHead.style.transform = 'translate3d(0,' + (-34 * x).toFixed(1) + 'px,0)';
-    lpCap.style.opacity = lpBeta.style.opacity = (1 - smooth(x / .25)).toFixed(3);
-    lpSide.style.opacity = (1 - away).toFixed(3); lpSide.style.transform = wide ? 'translate3d(' + (80 * x).toFixed(1) + 'px,0,0)' : 'translate3d(0,' + (80 * x).toFixed(1) + 'px,0)';
+    const away = smooth(x / .55), tag = smooth((x - .6) / .4);
+    // Everything else on the list is on the same plane as the window, so it rides the same camera: it grows about the
+    // window's starting centre and is carried with it, out past the edges, fading as it goes.
+    const zr = z / Math.exp(A.lz), tx = lerp(A.sx, C.sx) + (A.cx - lerp(A.cx, C.cx)) * z - A.sx, ty = lerp(A.sy, C.sy) + (A.cy - lerp(A.cy, C.cy)) * z - A.sy;
+    for (const el of zoomEls) {
+      el.style.transform = x > 0 ? 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) scale(' + zr.toFixed(4) + ')' : '';
+      el.style.opacity = x > 0 ? (1 - away).toFixed(3) : '';
+    }
+    lpCap.style.opacity = lpBeta.style.opacity = (1 - smooth(x / .3)).toFixed(3);
     lp.inert = x > .5; lp.style.visibility = x >= 1 ? 'hidden' : 'visible';
     markTag.style.opacity = tag.toFixed(3); markPill.style.opacity = tag.toFixed(3); markPill.style.pointerEvents = tag > .5 ? 'auto' : 'none';
   }
   const easeInOut = (q) => (q < .5 ? 4 * q * q * q : 1 - Math.pow(-2 * q + 2, 3) / 2);
+  // What rides the camera with the window, each scaled about the window's centre on the list (measured untransformed).
+  const zoomEls = [lpHead, lpCap, lpSide, faq];
+  faq.style.transition = 'none';
+  function zoomOrigins() {
+    if (!listCam) return;
+    const st = stage.getBoundingClientRect(), fx = st.left + listCam.sx, fy = st.top + listCam.sy;
+    for (const el of zoomEls) { const t = el.style.transform; el.style.transform = 'none'; const r = el.getBoundingClientRect(); el.style.transform = t; el.style.transformOrigin = (fx - r.left).toFixed(1) + 'px ' + (fy - r.top).toFixed(1) + 'px'; }
+  }
   function tween(to, ms, done) {
     cancelAnimationFrame(entryRaf);
+    zoomOrigins();
     const from = entry; let t0 = 0;
     const tick = (now) => {
       t0 = t0 || now;
@@ -1057,7 +1138,7 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
     faq.classList.add('in-flight');
     scrollTo(0, 0); // from partway down the questions, the EQ page still starts at its top
     hydrate();
-    activate(['hero', 'inst']);
+    activate(['hero'], ['inst']);
     tween(1, 1250, () => {
       mode = 'eq';
       html.classList.remove('list');
@@ -1174,5 +1255,54 @@ html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-s
   draw();
 })();
 </script>
+<script>
+// Into the Modular page and back. The flight in is played whole here (shared/fly-modular.js), then the Modular page opens
+// with the window already landed. Coming back, that page flies the window to this spot first.
+(() => {
+  const card = document.getElementById('lpMod'), art = document.getElementById('lpModArt');
+  if (!card || !art) return;
+  const html = document.documentElement, still = () => html.classList.contains('still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The camera's first push in: every element scales about the picture's centre, as if it were all one plane, and fades;
+  // the picture grows with it. Each element's origin is measured untransformed.
+  const ZOOM = 1.45;
+  const originAt = (el, fx, fy) => { const t = el.style.transform; el.style.transform = 'none'; const r = el.getBoundingClientRect(); el.style.transform = t; el.style.transformOrigin = (fx - r.left).toFixed(1) + 'px ' + (fy - r.top).toFixed(1) + 'px'; };
+  const zoomFrames = (out) => out ? [{ transform: 'none' }, { transform: 'scale(' + ZOOM + ')', opacity: 0 }] : [{ transform: 'scale(' + ZOOM + ')', opacity: 0 }, { transform: 'none' }];
+  const targets = () => [
+    ...document.querySelectorAll('.stage > .glow2, .stage > .persp, .lp-head, .lp-eq, .lp-side .lp-ph:not(.mod-card), .lp-faq'),
+    ...[...card.children].filter((e) => e !== art), ...art.querySelectorAll('.lp-beta'),
+  ];
+  let prefetched = false;
+  const prefetch = () => { if (prefetched) return; prefetched = true; const l = document.createElement('link'); l.rel = 'prefetch'; l.href = card.href; document.head.appendChild(l); };
+  if (!still()) {
+    // Chrome loads the Modular page ahead, so the flight never waits for it; other browsers just load it on the click.
+    if (HTMLScriptElement.supports?.('speculationrules')) {
+      const rules = document.createElement('script');
+      rules.type = 'speculationrules';
+      rules.textContent = JSON.stringify({ prerender: [{ source: 'list', urls: ['/plugins/modular/'], eagerness: 'eager' }] });
+      document.head.appendChild(rules);
+    }
+  }
+  card.addEventListener('pointerenter', prefetch); card.addEventListener('focus', prefetch); card.addEventListener('touchstart', prefetch, { passive: true });
+  card.addEventListener('click', (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || still() || !html.classList.contains('list')) return;
+    const r = art.getBoundingClientRect();
+    if (!r.width || r.height / r.width > 625 / 1000) return;
+    if (!window.flyToModular) return;
+    e.preventDefault();
+    window.flyToModular({ art, href: card.href, others: targets(), from: '/plugins/', top: scrollY < 4 });
+  });
+  // Back here from the Modular page's flight: the card is where the window landed; the rest fades back in around it.
+  if (html.classList.contains('fly-in')) {
+    try { sessionStorage.removeItem('mt-fly-back'); } catch { /* fine */ }
+    // The reverse of the way out: the window has landed on the card, and everything comes back in from the zoom around it.
+    const r = art.getBoundingClientRect(), fx = r.left + r.width / 2, fy = r.top + r.height / 2, timing = { duration: 560, easing: 'cubic-bezier(.1, .5, .5, 1)', fill: 'backwards' };
+    for (const el of targets()) { originAt(el, fx, fy); el.animate(zoomFrames(false), timing); }
+    html.classList.remove('fly-in');
+  }
+  // Back with the browser's button, from its page cache: show everything again.
+  addEventListener('pageshow', (e) => { if (e.persisted) for (const el of [...targets(), art]) el.getAnimations().forEach((a) => a.cancel()); });
+})();
+</script>
+<script src="/shared/fly-modular.js"></script>
 </body>
 </html>
