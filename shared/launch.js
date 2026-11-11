@@ -1,12 +1,11 @@
-// The "hear when they're on sale" form on /plugins, for POST /api/plugin/launch-list. The page shows the email address until this runs,
+// The waitlist form on /waitlist/, for POST /api/plugin/launch-list. The page shows the email address until this runs,
 // and keeps showing it without a Turnstile site key in config.js. It doesn't import account.js: this page doesn't load Supabase.
 import { PLUGIN_API, TURNSTILE_SITE_KEY } from './config.js'
 import { loadTurnstile } from './turnstile.js'
 
 const form = document.getElementById('notifyForm')
 const fallback = document.getElementById('notifyMail')
-// The EQ page is this same document, and shows none of this.
-if (form && TURNSTILE_SITE_KEY && document.documentElement.classList.contains('list')) {
+if (form && TURNSTILE_SITE_KEY) {
   const go = form.querySelector('button')
   const msg = form.querySelector('.notify-msg')
   const check = document.getElementById('notifyCheck')

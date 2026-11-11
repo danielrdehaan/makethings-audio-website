@@ -82,6 +82,14 @@ h1 .hit { text-shadow: 0 0 60px currentColor; }
 .cx li { padding: 5px 11px; border-radius: 999px; font: 500 13.5px var(--f-body); color: var(--ink); background: rgba(31, 37, 40, .9); box-shadow: inset 0 0 0 1px var(--line); }
 .t-img { display: none; }
 .mark-in { position: absolute; left: 0; right: 0; top: 0; z-index: 6; }
+/* The waitlist button: always on screen, placed by shared/waitlist-pill.js over its slot in the header or in the tour bar. */
+.wl-slot { margin-left: auto; flex: none; width: var(--wl-w, 150px); height: 36px; }
+.pill.wl { position: fixed; z-index: 60; left: 0; top: 0; padding: 8px 18px; font-size: 14.5px; white-space: nowrap; visibility: hidden; transition: box-shadow .2s ease; }
+.pill.wl.placed { visibility: visible; }
+#bar ol { padding-right: var(--wl-room, max(20px, 2vw)); }
+/* The bar is as tall as the waitlist button needs, its links centred in it, the current one underlined at its foot. */
+#bar a { padding-block: 0; line-height: 52px; }
+@media (max-width: 560px) { .mark-in .mark span { display: none; } .pill.wl { padding-inline: 14px; font-size: 13.5px; } }
 
 /* The bar: where you are in the scroll, once the headline has gone. */
 .bar { position: absolute; left: 0; right: 0; top: 0; z-index: 7; opacity: 0; background: rgba(17, 20, 22, .84); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); }
@@ -212,7 +220,7 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
     <div class="mark-in" id="markIn"><div class="wrap">
       <header class="top">
         <a class="mark" href="/plugins/">Make Things<span>Modular</span></a>
-        <a class="pill" href="#get">Pricing</a>
+        <span class="wl-slot" id="wlSlot" aria-hidden="true"></span>
         <a class="acct" href="/account/">Account</a>
       </header>
     </div></div>
@@ -409,7 +417,7 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
         </div>
         <div class="sticker-rail"><p class="sticker">Coming Soon</p></div>
       </div>
-      <p class="notify-link"><a href="/plugins/#notify">Get an email when they’re on sale →</a></p>
+      <p class="notify-link"><a href="/waitlist/">Join the waitlist →</a></p>
     </div>
   </section>
   <div class="wrap">
@@ -488,7 +496,7 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
   const scrollTopOf = () => scroller.getBoundingClientRect().top + scrollY;
   const beatAt = (id) => BEATS.findIndex((b) => b.id === id);
   links.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const i = beatAt(a.dataset.go); scrollTo({ top: scrollTopOf() + starts[i] * step, behavior: 'auto' }); }));
-  let pos = 0, shown = -1;
+  let pos = 0, shown = -1, lastCam = null;
   // Only the clips of the beat the camera has reached play; the ones it's flying to are fetched and wait on their first frame.
   function activate(playing, coming) {
     for (const [n, el] of Object.entries(layers)) {
@@ -515,6 +523,7 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
     const z = Math.exp(lerp(A.lz, C.lz) - dolly);
     const cx = lerp(A.cx, C.cx), cy = lerp(A.cy, C.cy), sx = lerp(A.sx, C.sx), sy = lerp(A.sy, C.sy), rot = lerp(A.rot, C.rot);
     world.style.transform = 'translate3d(' + (sx - cx * z).toFixed(2) + 'px,' + (sy - cy * z).toFixed(2) + 'px,0) rotateX(' + rot.toFixed(2) + 'deg) scale(' + z.toFixed(4) + ')';
+    lastCam = { cx, cy, sx, sy, lz: Math.log(z), rot };
     // Clips: the coming ones fade in over the current ones. A full-window clip stays under to the end of the flight; a
     // close-up the camera is leaving fades out, so the window behind it shows as the camera pulls back.
     const inA = new Set(layersOf(b)), inB = new Set(i === BEATS.length - 1 ? [] : layersOf(next));
@@ -619,7 +628,6 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
     try { localStorage.removeItem('mt-fly-modular'); } catch { /* fine */ }
     if (!arrival || Date.now() - arrival.t > 5000 || scrollY > 4) return;
     layout();
-    try { if (arrival.top) sessionStorage.setItem('mt-modular-card', JSON.stringify(arrival)); else sessionStorage.removeItem('mt-modular-card'); } catch { /* fine */ }
     // The card's page flew the window here and it landed in this first pose: only the words come in.
     if (arrival.landed) {
       last = -1; pos = target(); render(pos);
@@ -632,18 +640,41 @@ html.still .t-img { display: block; width: 100%; border-radius: 10px; margin-top
     fly(from, 0, 1, 1050, () => { renderEntry(1, from); last = -1; pos = target(); render(pos); });
   }
   if (document.prerendering) addEventListener('prerenderingchange', arrive, { once: true }); else arrive();
-  // Back to /plugins from the top of the page: the window flies back onto the card first.
+  // Back to /plugins. The flight is played whole there (shared/fly-modular.js, as the way in is): this page only fades to
+  // its bare window where it is (the hero clip under the beat's clips, everything else out) and leaves its camera. From
+  // below the scroll, the page first scrolls back to where the stage is in view.
+  const leaveCamera = () => { try { if (lastCam) sessionStorage.setItem('mt-modular-back', JSON.stringify({ cam: lastCam, vw: innerWidth, vh: innerHeight, t: Date.now() })); } catch { /* the page opens as it is */ } };
   document.querySelectorAll('.mark, .foot a[href="/plugins/"]').forEach((a) => a.addEventListener('click', (e) => {
-    const card = readHand('mt-modular-card');
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || !card || card.from !== new URL(a.href).pathname || scrollY > 4 || entering) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || entering) return;
     e.preventDefault();
-    const from = cardPose(card);
-    fly(from, 1, 0, 900, () => { try { sessionStorage.setItem('mt-fly-back', String(Date.now())); } catch { /* fine */ } location.href = a.href; });
+    cancelAnimationFrame(raf); raf = 0;
+    entering = true;
+    const p = pos, scrolled = scrollY, pinned = Math.min(scrolled, scrollTopOf() + (total - 1) * step), up = scrolled - pinned > 4;
+    const t0 = performance.now(), ms = up ? 650 : 320;
+    const tick = (now) => {
+      const q = Math.min(1, (now - t0) / ms), k = curve(q);
+      if (up) scrollTo(0, scrolled + (pinned - scrolled) * k);
+      render(p);
+      for (const [n, el] of Object.entries(layers)) {
+        if (n === 'hero') { el.style.visibility = 'visible'; el.style.opacity = '1'; el.style.zIndex = 0; continue; }
+        const v = +el.style.opacity * (1 - k); el.style.opacity = v.toFixed(3); if (v <= 0) el.style.visibility = 'hidden';
+      }
+      for (const el of [...texts, glow2, dimmer, scrim, bar]) el.style.opacity = ((el === glow2 ? 1 : +el.style.opacity) * (1 - k)).toFixed(3);
+      bar.style.pointerEvents = 'none';
+      if (q < 1) { requestAnimationFrame(tick); return; }
+      leaveCamera();
+      location.href = a.href;
+    };
+    requestAnimationFrame(tick);
   }));
+  // Leaving by the browser's back button: the same hand-off, from wherever the camera is.
+  addEventListener('pagehide', () => { if (!entering) leaveCamera(); });
   // Back here from the browser's page cache, after flying back: the window is in its first pose again.
-  addEventListener('pageshow', (e) => { if (!e.persisted) return; entering = false; world.style.clipPath = ''; glow2.style.opacity = ''; last = -1; pos = target(); render(pos); });
+  addEventListener('pageshow', (e) => { if (!e.persisted) return; entering = false; world.style.clipPath = ''; glow2.style.opacity = ''; for (const el of [...texts, dimmer, scrim, bar]) el.style.opacity = ''; last = -1; pos = target(); render(pos); });
   window.__stage = { pos: () => pos, starts: () => starts, step: () => step, top: scrollTopOf, beats: BEATS.length, playing: () => Object.entries(layers).filter(([, v]) => v.pause && !v.paused).map(([n]) => n), transform: () => world.style.transform };
 })();
 </script>
+<a class="pill wl" id="wlPill" href="/waitlist/">Join the waitlist</a>
+<script src="/shared/waitlist-pill.js"></script>
 </body>
 </html>
