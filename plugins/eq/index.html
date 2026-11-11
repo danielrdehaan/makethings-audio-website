@@ -391,8 +391,11 @@ a.lp-ph:hover .lp-go, a.lp-ph:focus-visible .lp-go { transform: translateX(4px);
 .stage.tall .lp-eq { flex: none; width: 100%; }
 .stage.tall .lp-side { flex: none; flex-direction: row; }
 .stage.tall .lp-ph { flex: 1 1 0; }
-.stage.tall .lp-art { flex: none; height: clamp(64px, 11vh, 150px); }
-@media (max-height: 760px) { .stage.tall .lp-art { display: none; } .stage.tall .lp-head h1 { font-size: 30px; } .stage.tall .lp-head p { margin-top: 4px; } }
+/* The cards' pictures stay on a phone too (the Modular card's is where its flight starts): never taller than 0.6 of their
+   width (half the row less the gap, as the flight needs), and on a short screen only as tall as the room the list leaves. */
+.stage.tall .lp-art { flex: none; height: min(clamp(64px, 11vh, 150px), 30vw - 17px); }
+@media (max-height: 760px) { .stage.tall .lp-art { height: min(max(44px, 100svh - 590px), 150px, 30vw - 17px); } .stage.tall .lp-head h1 { font-size: 30px; } .stage.tall .lp-head p { margin-top: 4px; } }
+@media (max-height: 620px) { .stage.tall .lp { padding-top: 58px; } .stage.tall .lp-head { margin-bottom: 10px; } .stage.tall .lp-head p { font-size: 14px; } .stage.tall .lp-cap { padding-top: 8px; } .stage.tall .lp-row, .stage.tall .lp-side { gap: 10px; } .stage.tall .lp-art { margin-bottom: 6px; } }
 /* The list's own close: the EQ page's statement, then the questions about it. Part of the list, not the EQ page. */
 .lp-faq { display: none; }
 html.list .lp-faq { display: block; position: relative; z-index: 1; padding-block: 0 clamp(56px, 8vw, 100px); scroll-margin-top: 12px; transition: opacity .25s ease; }
