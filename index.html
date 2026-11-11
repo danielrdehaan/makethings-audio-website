@@ -16,10 +16,12 @@
 <link rel="stylesheet" href="/styles.css">
 <style>
 .doors { display: grid; grid-template-columns: 2fr 1fr; gap: 26px; }
-.side { display: grid; gap: 22px; grid-template-rows: 1fr 1fr; }
+.side { display: grid; gap: 22px; grid-template-rows: 1.35fr 1fr; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; min-height: 0; }
+.pair .door p { font-size: 14px; }
 .door { display: flex; flex-direction: column; min-width: 0; }
 .door:hover .go { text-decoration: underline; }
-.art { flex: 1 1 0; min-height: 120px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; background: var(--raise); }
+.art { flex: 1 1 0; min-height: 64px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; background: var(--raise); }
 .art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
 .door h2 { margin: 12px 0 2px; font: 700 clamp(20px, 2vw, 27px)/1.15 var(--f); letter-spacing: -.03em; color: var(--ink); }
 .door p { margin: 0; font-size: 15.5px; line-height: 1.4; }
@@ -34,8 +36,10 @@
 @media (max-width: 720px) {
   .doors { grid-template-columns: 1fr; }
   .side { grid-template-rows: none; }
+  .pair { grid-template-columns: 1fr; gap: 22px; }
+  .pair .door p { font-size: 15.5px; }
   .art { flex: none; height: 150px; }
-  .big .art { height: auto; aspect-ratio: 1000 / 575; }
+  .big .art { height: auto; aspect-ratio: 1276 / 720; }
 }
 </style>
 </head>
@@ -54,6 +58,13 @@
       <span class="go">See them →</span>
     </a>
     <div class="side">
+      <a class="door" id="homeMod" href="/plugins/modular/">
+        <div class="art" id="homeModArt"><img src="/plugins/media/modular/hero.jpg" alt="The Make Things Modular window." decoding="async"></div>
+        <h2>Modular</h2>
+        <p>The modular rack that fits any slot, and plays anything.</p>
+        <span class="go">See it →</span>
+      </a>
+      <div class="pair">
       <a class="door" href="https://stems.makethings.audio/">
         <div class="art icon"><svg viewBox="0 0 200 84" aria-hidden="true"><g fill="var(--ring)"><rect x="6" y="13" width="5" height="6" rx="2.5"/><rect x="15" y="10" width="5" height="12" rx="2.5"/><rect x="24" y="6" width="5" height="20" rx="2.5"/><rect x="33" y="9" width="5" height="14" rx="2.5"/><rect x="42" y="12" width="5" height="8" rx="2.5"/><rect x="51" y="7" width="5" height="18" rx="2.5"/><rect x="60" y="5" width="5" height="22" rx="2.5"/><rect x="69" y="10" width="5" height="12" rx="2.5"/><rect x="78" y="13" width="5" height="6" rx="2.5"/><rect x="87" y="11" width="5" height="10" rx="2.5"/><rect x="96" y="8" width="5" height="16" rx="2.5"/><rect x="105" y="5" width="5" height="22" rx="2.5"/><rect x="114" y="9" width="5" height="14" rx="2.5"/><rect x="123" y="12" width="5" height="8" rx="2.5"/><rect x="132" y="10" width="5" height="12" rx="2.5"/><rect x="141" y="6" width="5" height="20" rx="2.5"/><rect x="150" y="8" width="5" height="16" rx="2.5"/><rect x="159" y="12" width="5" height="8" rx="2.5"/><rect x="168" y="13" width="5" height="6" rx="2.5"/><rect x="177" y="10" width="5" height="12" rx="2.5"/><rect x="186" y="12" width="5" height="8" rx="2.5"/></g><g fill="var(--accent)"><rect x="6" y="37" width="5" height="10" rx="2.5"/><rect x="15" y="34" width="5" height="16" rx="2.5"/><rect x="24" y="38" width="5" height="8" rx="2.5"/><rect x="33" y="35" width="5" height="14" rx="2.5"/><rect x="42" y="31" width="5" height="22" rx="2.5"/><rect x="51" y="33" width="5" height="18" rx="2.5"/><rect x="60" y="37" width="5" height="10" rx="2.5"/><rect x="69" y="39" width="5" height="6" rx="2.5"/><rect x="78" y="35" width="5" height="14" rx="2.5"/><rect x="87" y="32" width="5" height="20" rx="2.5"/><rect x="96" y="36" width="5" height="12" rx="2.5"/><rect x="105" y="38" width="5" height="8" rx="2.5"/><rect x="114" y="33" width="5" height="18" rx="2.5"/><rect x="123" y="31" width="5" height="22" rx="2.5"/><rect x="132" y="37" width="5" height="10" rx="2.5"/><rect x="141" y="39" width="5" height="6" rx="2.5"/><rect x="150" y="35" width="5" height="14" rx="2.5"/><rect x="159" y="33" width="5" height="18" rx="2.5"/><rect x="168" y="37" width="5" height="10" rx="2.5"/><rect x="177" y="35" width="5" height="14" rx="2.5"/><rect x="186" y="39" width="5" height="6" rx="2.5"/></g><g fill="var(--amber)"><rect x="6" y="64" width="5" height="8" rx="2.5"/><rect x="15" y="65" width="5" height="6" rx="2.5"/><rect x="24" y="61" width="5" height="14" rx="2.5"/><rect x="33" y="58" width="5" height="20" rx="2.5"/><rect x="42" y="62" width="5" height="12" rx="2.5"/><rect x="51" y="57" width="5" height="22" rx="2.5"/><rect x="60" y="60" width="5" height="16" rx="2.5"/><rect x="69" y="64" width="5" height="8" rx="2.5"/><rect x="78" y="62" width="5" height="12" rx="2.5"/><rect x="87" y="65" width="5" height="6" rx="2.5"/><rect x="96" y="59" width="5" height="18" rx="2.5"/><rect x="105" y="61" width="5" height="14" rx="2.5"/><rect x="114" y="57" width="5" height="22" rx="2.5"/><rect x="123" y="63" width="5" height="10" rx="2.5"/><rect x="132" y="60" width="5" height="16" rx="2.5"/><rect x="141" y="64" width="5" height="8" rx="2.5"/><rect x="150" y="65" width="5" height="6" rx="2.5"/><rect x="159" y="62" width="5" height="12" rx="2.5"/><rect x="168" y="59" width="5" height="18" rx="2.5"/><rect x="177" y="64" width="5" height="8" rx="2.5"/><rect x="186" y="63" width="5" height="10" rx="2.5"/></g><path d="M128 8h44a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10h-28l-12 12v-12h-4a10 10 0 0 1-10-10V18a10 10 0 0 1 10-10z" fill="var(--ink)" stroke="var(--raise)" stroke-width="5" paint-order="stroke"/><g fill="var(--raise)"><circle cx="136" cy="29" r="4"/><circle cx="150" cy="29" r="4"/><circle cx="164" cy="29" r="4"/></g></svg></div>
         <h2>StemShare</h2>
@@ -66,6 +77,7 @@
         <p>Workflow tools for REAPER, Unity and FMOD.</p>
         <span class="go">Browse →</span>
       </a>
+      </div>
     </div>
   </main>
   <section class="made" aria-label="How Make Things tools are made">
@@ -74,6 +86,40 @@
   </section>
 </div>
 <footer><div class="wrap"><span>© 2026 Make Things</span><span><a href="mailto:support@makethings.audio">support@makethings.audio</a></span></div></footer>
+<script>
+// The Modular door flies its picture into the Modular page's first pose (shared/fly-modular.js), then opens it.
+(() => {
+  const door = document.getElementById('homeMod'), art = document.getElementById('homeModArt');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // The camera's first push in: every element scales about the picture's centre, as if it were all one plane, and fades;
+  // the picture grows with it. Each element's origin is measured untransformed.
+  const ZOOM = 1.45;
+  const originAt = (el, fx, fy) => { const t = el.style.transform; el.style.transform = 'none'; const r = el.getBoundingClientRect(); el.style.transform = t; el.style.transformOrigin = (fx - r.left).toFixed(1) + 'px ' + (fy - r.top).toFixed(1) + 'px'; };
+  const zoomFrames = (out) => out ? [{ transform: 'none' }, { transform: 'scale(' + ZOOM + ')', opacity: 0 }] : [{ transform: 'scale(' + ZOOM + ')', opacity: 0 }, { transform: 'none' }];
+  const targets = () => [...document.querySelectorAll('h1, .door:not(#homeMod), .made, footer'), ...[...door.children].filter((e) => e !== art)];
+  let prefetched = false;
+  const prefetch = () => { if (prefetched) return; prefetched = true; const l = document.createElement('link'); l.rel = 'prefetch'; l.href = door.href; document.head.appendChild(l); };
+  // Chrome loads the Modular page ahead, so the flight never waits for it; other browsers just load it on the click.
+  if (HTMLScriptElement.supports?.('speculationrules')) {
+    const rules = document.createElement('script');
+    rules.type = 'speculationrules';
+    rules.textContent = JSON.stringify({ prerender: [{ source: 'list', urls: ['/plugins/modular/'], eagerness: 'eager' }] });
+    document.head.appendChild(rules);
+  }
+
+  door.addEventListener('pointerenter', prefetch); door.addEventListener('focus', prefetch); door.addEventListener('touchstart', prefetch, { passive: true });
+  door.addEventListener('click', (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    const r = art.getBoundingClientRect();
+    if (!r.width || r.height / r.width > 625 / 1000) return;
+    if (!window.flyToModular) return;
+    e.preventDefault();
+    window.flyToModular({ art, href: door.href, others: targets(), fadeOnly: [document.querySelector('header')], from: '/', top: false });
+  });
+  addEventListener('pageshow', (e) => { if (e.persisted) for (const el of [...targets(), art, document.querySelector('header')]) el.getAnimations().forEach((a) => a.cancel()); });
+})();
+</script>
+<script src="/shared/fly-modular.js"></script>
 <script src="/shared/wordmark.js"></script>
 </body>
 </html>
