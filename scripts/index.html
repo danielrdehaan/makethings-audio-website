@@ -9,6 +9,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<style>
+/* From the home page and back (index.html): its Scripts card's title becomes this headline; the header stays put. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+header { view-transition-name: site-head; }
+.page-header h1 { view-transition-name: door-scripts; width: fit-content; }
+</style>
 </head>
 <body>
 <div class="wrap">
