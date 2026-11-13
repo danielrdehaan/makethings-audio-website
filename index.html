@@ -40,7 +40,18 @@ h1 { text-wrap: balance; }
   .art { flex: none; height: 150px; }
   .big .art { height: auto; aspect-ratio: 1276 / 720; }
 }
+/* Into /plugins and /scripts and back (styles.css has the timing): the Plugins picture becomes the EQ card's window, and
+   the Scripts title becomes that page's headline. The header is the same on /scripts, so it stays put. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+header { view-transition-name: site-head; }
+.big .art { view-transition-name: door-plugins; }
+.door.scripts h2 { view-transition-name: door-scripts; width: fit-content; }
 </style>
+<link rel="preconnect" href="https://stems.makethings.audio">
+<!-- Hovering a card starts drawing its page, so the flight lands on a page that's ready (Chrome). StemShare is another
+     origin on this site: it opts in with Supports-Loading-Mode (stem-share's public/_headers). -->
+<script type="speculationrules">{"prerender": [{"source": "list", "urls": ["/plugins/", "/scripts/", "https://stems.makethings.audio/"], "eagerness": "moderate"}]}</script>
 </head>
 <body>
 <div class="wrap">
@@ -57,13 +68,13 @@ h1 { text-wrap: balance; }
       <span class="go">See them →</span>
     </a>
     <div class="side">
-      <a class="door" href="https://stems.makethings.audio/">
+      <a class="door stemshare" href="https://stems.makethings.audio/">
         <div class="art icon"><svg viewBox="0 0 200 84" aria-hidden="true"><g fill="var(--ring)"><rect x="6" y="13" width="5" height="6" rx="2.5"/><rect x="15" y="10" width="5" height="12" rx="2.5"/><rect x="24" y="6" width="5" height="20" rx="2.5"/><rect x="33" y="9" width="5" height="14" rx="2.5"/><rect x="42" y="12" width="5" height="8" rx="2.5"/><rect x="51" y="7" width="5" height="18" rx="2.5"/><rect x="60" y="5" width="5" height="22" rx="2.5"/><rect x="69" y="10" width="5" height="12" rx="2.5"/><rect x="78" y="13" width="5" height="6" rx="2.5"/><rect x="87" y="11" width="5" height="10" rx="2.5"/><rect x="96" y="8" width="5" height="16" rx="2.5"/><rect x="105" y="5" width="5" height="22" rx="2.5"/><rect x="114" y="9" width="5" height="14" rx="2.5"/><rect x="123" y="12" width="5" height="8" rx="2.5"/><rect x="132" y="10" width="5" height="12" rx="2.5"/><rect x="141" y="6" width="5" height="20" rx="2.5"/><rect x="150" y="8" width="5" height="16" rx="2.5"/><rect x="159" y="12" width="5" height="8" rx="2.5"/><rect x="168" y="13" width="5" height="6" rx="2.5"/><rect x="177" y="10" width="5" height="12" rx="2.5"/><rect x="186" y="12" width="5" height="8" rx="2.5"/></g><g fill="var(--accent)"><rect x="6" y="37" width="5" height="10" rx="2.5"/><rect x="15" y="34" width="5" height="16" rx="2.5"/><rect x="24" y="38" width="5" height="8" rx="2.5"/><rect x="33" y="35" width="5" height="14" rx="2.5"/><rect x="42" y="31" width="5" height="22" rx="2.5"/><rect x="51" y="33" width="5" height="18" rx="2.5"/><rect x="60" y="37" width="5" height="10" rx="2.5"/><rect x="69" y="39" width="5" height="6" rx="2.5"/><rect x="78" y="35" width="5" height="14" rx="2.5"/><rect x="87" y="32" width="5" height="20" rx="2.5"/><rect x="96" y="36" width="5" height="12" rx="2.5"/><rect x="105" y="38" width="5" height="8" rx="2.5"/><rect x="114" y="33" width="5" height="18" rx="2.5"/><rect x="123" y="31" width="5" height="22" rx="2.5"/><rect x="132" y="37" width="5" height="10" rx="2.5"/><rect x="141" y="39" width="5" height="6" rx="2.5"/><rect x="150" y="35" width="5" height="14" rx="2.5"/><rect x="159" y="33" width="5" height="18" rx="2.5"/><rect x="168" y="37" width="5" height="10" rx="2.5"/><rect x="177" y="35" width="5" height="14" rx="2.5"/><rect x="186" y="39" width="5" height="6" rx="2.5"/></g><g fill="var(--amber)"><rect x="6" y="64" width="5" height="8" rx="2.5"/><rect x="15" y="65" width="5" height="6" rx="2.5"/><rect x="24" y="61" width="5" height="14" rx="2.5"/><rect x="33" y="58" width="5" height="20" rx="2.5"/><rect x="42" y="62" width="5" height="12" rx="2.5"/><rect x="51" y="57" width="5" height="22" rx="2.5"/><rect x="60" y="60" width="5" height="16" rx="2.5"/><rect x="69" y="64" width="5" height="8" rx="2.5"/><rect x="78" y="62" width="5" height="12" rx="2.5"/><rect x="87" y="65" width="5" height="6" rx="2.5"/><rect x="96" y="59" width="5" height="18" rx="2.5"/><rect x="105" y="61" width="5" height="14" rx="2.5"/><rect x="114" y="57" width="5" height="22" rx="2.5"/><rect x="123" y="63" width="5" height="10" rx="2.5"/><rect x="132" y="60" width="5" height="16" rx="2.5"/><rect x="141" y="64" width="5" height="8" rx="2.5"/><rect x="150" y="65" width="5" height="6" rx="2.5"/><rect x="159" y="62" width="5" height="12" rx="2.5"/><rect x="168" y="59" width="5" height="18" rx="2.5"/><rect x="177" y="64" width="5" height="8" rx="2.5"/><rect x="186" y="63" width="5" height="10" rx="2.5"/></g><path d="M128 8h44a10 10 0 0 1 10 10v22a10 10 0 0 1-10 10h-28l-12 12v-12h-4a10 10 0 0 1-10-10V18a10 10 0 0 1 10-10z" fill="var(--ink)" stroke="var(--raise)" stroke-width="5" paint-order="stroke"/><g fill="var(--raise)"><circle cx="136" cy="29" r="4"/><circle cx="150" cy="29" r="4"/><circle cx="164" cy="29" r="4"/></g></svg></div>
         <h2>StemShare</h2>
         <p>Learn, share your stems and get feedback.</p>
         <span class="go">Open it →</span>
       </a>
-      <a class="door" href="/scripts/">
+      <a class="door scripts" href="/scripts/">
         <div class="art icon"><svg viewBox="0 0 200 84" aria-hidden="true"><g fill="none" stroke="var(--amber)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C46 6 43 11 43 19v12c0 7-4 11-11 11 7 0 11 4 11 11v12c0 8 3 13 13 13"/><path d="M144 6c10 0 13 5 13 13v12c0 7 4 11 11 11-7 0-11 4-11 11v12c0 8-3 13-13 13"/></g><g fill="var(--hit)"><rect x="69" y="34" width="5.5" height="16" rx="2.75"/><rect x="78.5" y="25" width="5.5" height="34" rx="2.75"/><rect x="88" y="15" width="5.5" height="54" rx="2.75"/><rect x="97.5" y="8" width="5.5" height="68" rx="2.75"/><rect x="107" y="19" width="5.5" height="46" rx="2.75"/><rect x="116.5" y="28" width="5.5" height="28" rx="2.75"/><rect x="126" y="35" width="5.5" height="14" rx="2.75"/></g></svg></div>
         <h2>Scripts</h2>
         <p>Workflow tools for REAPER, Unity and FMOD.</p>
@@ -78,5 +89,6 @@ h1 { text-wrap: balance; }
 </div>
 <footer><div class="wrap"><span>© 2026 Make Things</span><span><a href="mailto:support@makethings.audio">support@makethings.audio</a></span></div></footer>
 <script src="/shared/wordmark.js"></script>
+<script src="/shared/to-stemshare.js"></script>
 </body>
 </html>

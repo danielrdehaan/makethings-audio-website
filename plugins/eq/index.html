@@ -441,6 +441,21 @@ html.still .lp-eq { flex: none; width: 100%; }
 html.still .lp-side { flex: none; }
 html.still .lp-art { flex: none; height: 90px; }
 html.still .lp-slot img { display: block; width: 100%; border-radius: 6px; box-shadow: 0 0 0 1px var(--line); }
+/* From the home page and back: its Plugins picture becomes the EQ's window over its slot (the same rules as styles.css,
+   which this page doesn't load). The Modular page doesn't opt in, so its own flights are untouched. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+html.list:not(.still) .world, html.list.still .lp-slot { view-transition-name: door-plugins; }
+/* The sticker has a layer of its own, or the window flying in would cover it until the very end. */
+html.list:not(.still) #lpBeta { view-transition-name: eq-beta; }
+::view-transition-new(eq-beta) { animation: .35s .6s ease-out both vt-in; }
+::view-transition-old(eq-beta) { animation: .2s ease-in both vt-out; }
+::view-transition-group(*) { animation-duration: .9s; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+::view-transition-group(door-plugins) { overflow: clip; border-radius: 6px; }
+::view-transition-old(root) { animation: .45s ease-in both vt-out; }
+::view-transition-new(root) { animation: .55s .3s ease-out both vt-in; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; } }
 </style>
 </head>
 <body>

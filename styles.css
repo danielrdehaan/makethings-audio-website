@@ -55,3 +55,13 @@ main > .wrap > .tools-grid { padding-bottom: clamp(40px, 6vw, 80px); }
   /* The links are on the page itself, so the phone's header keeps only the account. */
   nav a:not(:last-child) { display: none; }
 }
+
+/* Between the home page and /plugins or /scripts, the pages that opt in with @view-transition: the clicked card's picture
+   or title glides to its place on the next page, on the plugin flights' easing, while the rest crossfades.
+   /plugins carries a copy of these rules (it doesn't load this file). */
+::view-transition-group(*) { animation-duration: .9s; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+::view-transition-group(door-plugins) { overflow: clip; border-radius: 6px; }
+::view-transition-old(root) { animation: .45s ease-in both vt-out; }
+::view-transition-new(root) { animation: .55s .3s ease-out both vt-in; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; } }
